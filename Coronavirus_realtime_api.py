@@ -86,7 +86,6 @@ p.add_tools(hover)
 citation = Label(x=0, y=0, x_units='screen', y_units='screen',
                  text='Last Updated : {}'.format(latest_date), render_mode='css', text_font_size='12px')
 p.add_layout(citation, 'above')
-bokeh_doc.add_root(p)
 
 tab1 = Panel(child=p, title="All Cases - Statewise")
 
