@@ -2,20 +2,11 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from pandas import DataFrame
-#import folium
 import seaborn as sns
 import json
 import requests
-#import kaggle
-#import kaggledatasets
-#from zipfile import ZipFile
-#from googleapiclient.discovery import build
-##from google_auth_oauthlib.flow import InstalledAppFlow
-#from google.auth.transport.requests import Request
-#import pickle
 import os.path
 import lxml
-#import html2csv
 from matplotlib.ticker import AutoMinorLocator
 import csv
 from pandas.io.json import json_normalize
@@ -50,7 +41,7 @@ highest_state=cases_summary[cases_summary['totalConfirmed']==cases_summary['tota
 
 legend_it=[]
 
-p = figure(plot_width=1200, plot_height=700, x_axis_type="datetime",  sizing_mode="scale_both")
+p = figure(plot_width=1200, plot_height=600, x_axis_type="datetime",  sizing_mode="scale_both")
 p.title.text='Statewise Cases over Time'
 p.title.align='center'
 p.title.text_font_size='17px'
@@ -93,7 +84,7 @@ tab1 = Panel(child=p, title="All Cases - Statewise")
 
 legend_it=[]
 
-q = figure(plot_width=1200, plot_height=700, x_axis_type="datetime",  sizing_mode="scale_both")
+q = figure(plot_width=1200, plot_height=600, x_axis_type="datetime",  sizing_mode="scale_both")
 q.title.text='Statewise Deaths over Time'
 q.title.align='center'
 q.title.text_font_size='17px'
@@ -178,7 +169,7 @@ tab2 = Panel(child=q, title="All Deaths - Statewise")
 
 legend_it=[]
 
-s = figure(plot_width=1200, plot_height=700, x_axis_type="datetime",  sizing_mode="scale_both")
+s = figure(plot_width=1200, plot_height=600, x_axis_type="datetime",  sizing_mode="scale_both")
 s.title.text='Statewise Case-to-Death Ratio over Time'
 s.title.align='center'
 s.title.text_font_size='17px'
@@ -432,7 +423,7 @@ cases_summary['loc']=np.where(cases_summary['loc']=='Nagaland#', 'Nagaland', cas
 
 legend_it=[]
 
-w = figure(plot_width=1200, plot_height=700, x_axis_type="datetime",  sizing_mode="scale_both")
+w = figure(plot_width=1200, plot_height=600, x_axis_type="datetime",  sizing_mode="scale_both")
 w.title.text='Case Growth Rate'
 w.title.align='center'
 w.title.text_font_size='17px'
@@ -486,7 +477,7 @@ tab7 = Panel(child=layout, title="Cases Growth Rate - Statewise")
 
 legend_it=[]
 
-x = figure(plot_width=1200, plot_height=700, x_axis_type="datetime",  sizing_mode="scale_both")
+x = figure(plot_width=1200, plot_height=600, x_axis_type="datetime",  sizing_mode="scale_both")
 x.title.text='Death Growth Rate'
 x.title.align='center'
 x.title.text_font_size='17px'
