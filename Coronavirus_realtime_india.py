@@ -132,50 +132,6 @@ fig = column(q,div, sizing_mode='scale_both')
 
 tab2 = Panel(child=fig, title="All Deaths - Statewise")
 
-#statwise death and total case over time
-
-#r = figure(plot_width=1200, plot_height=700, x_axis_type="datetime",  sizing_mode="scale_both")
-#r.title.text='statewise deaths over time'
-#r.title.align='center'
-#r.title.text_font_size='17px'
-#r.xaxis.axis_label = 'date'
-#r.yaxis.axis_label = 'cases/deaths'
-#
-#
-#for name, color in zip(cases_summary['loc'].unique(), itertools.cycle(Spectral11)):
-#    cases_summary['day'] = pd.to_datetime(cases_summary['day'])
-#    renderer=r.line(cases_summary[cases_summary['loc']==name]['day'], cases_summary[cases_summary['loc']==name]['totalconfirmed'], line_width=2, color=color, alpha=1,
-#          muted_alpha=0.2, line_color=color)
-#    if renderer.on_change('visible'):
-#        renderer_deaths.visible = true
-#        renderer_deaths=r.line(cases_summary[cases_summary['loc']==name]['day'], cases_summary[cases_summary['loc']==name]['deaths'], line_width=2, color=color, alpha=1,
-#          muted_alpha=0.2, legend_label='deceased', line_color=color)
-#
-#    else:
-#        renderer_deaths.visible=false
-#
-#    renderer.visible = false
-#    renderer_deaths.visible = false
-#
-#    legend_it.append((name, [renderer]))
-#
-#legend1=legend(items=legend_it[0:16], location=(10,110), click_policy='hide', title="toggle states to activate", title_text_font_style = "bold")
-#legend2=legend(items=legend_it[17:33], location=(10,110), click_policy='hide', title="toggle states to activate", title_text_font_style = "bold")
-#
-#r.add_layout(legend1,'right')
-#r.add_layout(legend2,'right')
-#
-#cases_summary['day']=cases_summary['day'].astype('str')
-#
-#hover = hovertool(line_policy='next')
-#hover.tooltips = [('date', '@x{%f}'),
-#                  ('deaths', '@y{0000}')  # @$name gives the value corresponding to the legend
-#]
-#hover.formatters = {'@x': 'datetime'}
-#r.add_tools(hover)
-#tab3 = panel(child=r, title="cases/deaths")
-
-
 #statewise case-to-death ratio over time
 
 legend_it=[]
@@ -260,7 +216,7 @@ t.add_tools(hover)
 div1 = Div(text="""<b>Latest Date</b>: {} <br> <br>
                 <b>Total Cases</b>: {:,} <br> 
                 <b>Total Deaths</b>: {:,} <br> 
-                 <b>Total Discharged</b>: {:,} <br> <br>
+                 <b>Total Recovered</b>: {:,} <br> <br>
                 <b>{} </b> has {:,} cases with the highest number of cases per death: {:.2f} <br><br> 
                 <b>{} </b> has the highest number of cases of {:,} with {:.2f} cases per death. """
           .format(latest_date,cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum(),
@@ -317,7 +273,7 @@ u.yaxis.axis_label = 'Cases'
 u.xaxis.major_label_orientation = math.pi/2
 
 total_bar=u.vbar(cases_summary['day'], top=cases_summary['daily confirmed'], width=0.9, legend_label='Daily Confirmed', color='#5e4fa2')
-discharged_bar=u.vbar(cases_summary['day'], top=cases_summary['daily discharged'], width=0.9, legend_label='Daily Discharged', color='#66c2a5')
+discharged_bar=u.vbar(cases_summary['day'], top=cases_summary['daily discharged'], width=0.9, legend_label='Daily Recovered', color='#66c2a5')
 deceased_bar=u.vbar(cases_summary['day'], top=cases_summary['daily deaths'], width=0.9, legend_label='Daily Deaths', color='#3288bd')
 
 hover_total_bar = HoverTool(line_policy='next', renderers=[total_bar])
@@ -332,7 +288,7 @@ hover_deceased_bar.tooltips = [('Day', '@x'),
 
 hover_discharged_bar = HoverTool(line_policy='next', renderers=[discharged_bar])
 hover_discharged_bar.tooltips = [('Day', '@x'),
-                  ('Daily Discharged', '@top')  # @$name gives the value corresponding to the legend
+                  ('Daily Recovered', '@top')  # @$name gives the value corresponding to the legend
 ]
 
 u.add_tools(hover_total_bar)
@@ -347,22 +303,22 @@ total_bar.visible=False
 deceased_bar.visible=False
 discharged_bar.visible=False
 
-#citation = Label(x=0, y=0, x_units='screen', y_units='screen',
-#                 text='Last Updated : {}'.format(latest_date), render_mode='css', text_font_size='12px')
-#u.add_layout(citation, 'above')
-
 div = Div(text="""<b>Latest Date</b>: {} <br> <br>
                 <b>Total Cases</b>: {:,} <br> 
                 <b>Total Deaths</b>: {:,} <br> 
-                 <b>Total Discharged</b>: {:,} <br> <br>
+                 <b>Total Recovered</b>: {:,} <br> <br>
+                 <b>Fatality Rate</b>: {:.2%} <br>
+                 <b>Recovery Rate</b>: {:.2%} <br><br>
                  <b> Important Dates: </b> <br><br>
                 {}: <br>The highest number of cases - {:,}  <br><br> 
                 {}: <br>The highest number of deaths - {:,} <br><br>
-                {}: <br>The highest number of discharges - {:,} """
+                {}: <br>The highest number of Recovery - {:,} """
           .format(latest_date,
                   cases_summary.iloc[-1]['total'],
                   cases_summary.iloc[-1]['deaths'],
                   cases_summary.iloc[-1]['discharged'],
+                  (cases_summary['deaths'][-1:]/cases_summary['total'][-1:]).tolist()[0],
+                  (cases_summary['discharged'][-1:]/cases_summary['total'][-1:]).tolist()[0],
                   cases_summary[cases_summary['daily confirmed']==cases_summary['daily confirmed'].max()]['day'].tolist()[0],
                   cases_summary['daily confirmed'].max().astype('int64'),
                   cases_summary[cases_summary['daily deaths']==cases_summary['daily deaths'].max()]['day'].tolist()[0],
@@ -398,7 +354,7 @@ v.xaxis.major_label_orientation = math.pi/2
 
 case_growth_line=v.line(cases_summary['day'], cases_summary['total'].pct_change(), line_width=2, legend_label='Daily Case Growth Rate', color='#5e4fa2')
 death_growth_line=v.line(cases_summary['day'],cases_summary['deaths'].pct_change(), line_width=2, legend_label='Daily Deceased Growth Rate', color='#3288bd')
-discharge_growth_line=v.line(cases_summary['day'],cases_summary['discharged'].pct_change(), line_width=2, legend_label='Daily Discharged Growth Rate', color='#66c2a5')
+discharge_growth_line=v.line(cases_summary['day'],cases_summary['discharged'].pct_change(), line_width=2, legend_label='Daily Recovered Growth Rate', color='#66c2a5')
 
 cases_summary['day'] = cases_summary['day'].astype('str')
 hover_case_growth = HoverTool(line_policy='next', renderers=[case_growth_line])
@@ -413,7 +369,7 @@ hover_death_growth.tooltips = [('Day', '@x{%F}'),
 
 hover_discharge_growth = HoverTool(line_policy='next', renderers=[discharge_growth_line])
 hover_discharge_growth.tooltips = [('Day', '@x{%F}'),
-                  ('Daily Discharged Growth Rate', '@y{0:.0%}')  # @$name gives the value corresponding to the legend
+                  ('Daily Recovered Growth Rate', '@y{0:.0%}')  # @$name gives the value corresponding to the legend
 ]
 
 hover_death_growth.formatters = {'@x': 'datetime'}
@@ -432,11 +388,11 @@ case_growth_line.visible=False
 death_growth_line.visible=False
 discharge_growth_line.visible=False
 
-#citation = Label(x=0, y=0, x_units='screen', y_units='screen',
-#                 text='Last Updated : {}'.format(latest_date), render_mode='css', text_font_size='12px')
-#v.add_layout(citation, 'above')
-
-div = Div(text="""<b>Latest Date</b>: {} <br> <b>Total Cases</b>: {:,} <br> <b>Total Deaths</b>: {:,} <br> <br> <b>Latest Case Growth Rate</b>: {:.2%} <br> <b>Latest Death Growth Rate</b>: {:.2%} <br> <b>Latest Discharge Growth Rate</b>: {:.2%}""".format(latest_date,cases_summary.iloc[-1]['total'],cases_summary.iloc[-1]['deaths'],cases_summary.iloc[-1]['daily_case_growth'],cases_summary.iloc[-1]['daily_death_growth'],cases_summary.iloc[-1]['daily_discharge_growth'] ),
+div = Div(text="""<b>Latest Date</b>: {} <br> <b>Total Cases</b>: {:,} <br> <b>Total Deaths</b>: {:,} <br> <br> <b>Latest Case Growth Rate</b>: {:.2%} <br> <b>Latest Death Growth Rate</b>: {:.2%} <br> <b>Latest Revovered Growth Rate</b>: {:.2%} <br><br>
+                <b> Fatality Rate</b>: {:.2%} <br>
+                <b> Recovery Rate</b>: {:.2%}"""
+                .format(latest_date,cases_summary.iloc[-1]['total'],cases_summary.iloc[-1]['deaths'],cases_summary.iloc[-1]['daily_case_growth'],cases_summary.iloc[-1]['daily_death_growth'],cases_summary.iloc[-1]['daily_discharge_growth'],
+                                                    (cases_summary['deaths'][-1:] / cases_summary['total'][-1:]).tolist()[0], (cases_summary['discharged'][-1:]/cases_summary['total'][-1:]).tolist()[0] ),
 width=200, height=100)
 layout = row(v, div)
 
@@ -472,7 +428,6 @@ cases_summary['daily_case_growth']=cases_summary['discharged'].groupby(cases_sum
 
 for name, color in zip(cases_summary['loc'].unique(), itertools.cycle(Spectral11)):
     cases_summary['day'] = pd.to_datetime(cases_summary['day'])
-    #cases_summary['daily confirmed'] = cases_summary[cases_summary['loc'] == name]['totalConfirmed'].diff(1)
     renderer=w.line(cases_summary[cases_summary['loc']==name]['day'], cases_summary[cases_summary['loc']==name]['totalConfirmed'].pct_change(), line_width=2, color=color, alpha=1,
           muted_alpha=0.2)
 
@@ -498,9 +453,6 @@ hover.tooltips = [('Date', '@x{%F}'),
 hover.formatters = {'@x': 'datetime'}
 w.add_tools(hover)
 
-#citation = Label(x=0, y=0, x_units='screen', y_units='screen',
-#                 text='Last Updated : {}'.format(latest_date), render_mode='css', text_font_size='12px')
-#w.add_layout(citation, 'above')
 
 div1 = Div(text="""<b>Source:</b>
                 COVID-19 REST API for India: <a href='https://api.rootnet.in/covid19-in/stats/history' target="_blank"> The Ministry of Health and Family Welfare</a> """,
@@ -551,11 +503,10 @@ source=ColumnDataSource(cases_summary)
 
 hover = HoverTool(line_policy='next')
 hover.tooltips = [('Date', '@x{%F}'),
-                  ('Death Growth Rate', '@y{0:.0%}')  # @$name gives the value corresponding to the legend
+                  ('Fatality Growth Rate', '@y{0:.0%}')  # @$name gives the value corresponding to the legend
 ]
 hover.formatters = {'@x': 'datetime'}
 x.add_tools(hover)
-
 
 div1 = Div(text="""<b>Source:</b>
                 COVID-19 REST API for India: <a href='https://api.rootnet.in/covid19-in/stats/history' target="_blank"> The Ministry of Health and Family Welfare</a> """,
@@ -588,10 +539,8 @@ y.yaxis.axis_label = 'Tests Count'
 
 sample_test=y.vbar(x=cases_tests['timestamp'], bottom=cases_tests['totalSamplesTested'], width=timedelta(days=0.5), color='#5e4fa2', alpha=1,
           legend_label="Samples Tested")
-positive_test=y.vbar(x=cases_tests['timestamp'], top=cases_tests['totalPositiveCases'], width=timedelta(days=0.5),  color='#3288bd', alpha=1,
+positive_test=y.vbar(x=cases_tests['timestamp'], top=cases_summary.groupby(['day'])['totalConfirmed'].sum(), width=timedelta(days=0.5),  color='#3288bd', alpha=1,
           legend_label="Tested Positive")
-
-#cases_summary['day']=cases_summary['day'].astype('str')
 
 hover = HoverTool(line_policy='next', renderers=[sample_test])
 hover.tooltips = [('Date', '@x{%F}'),
@@ -608,7 +557,6 @@ hover_pos.formatters = {'@x': 'datetime'}
 y.add_tools(hover)
 y.add_tools(hover_pos)
 y.legend.location='top_left'
-
 
 div = Div(text="""<b>Latest Date</b>: {} <br> <br> <b>Total Tests</b>: {:,} <br><br> <b>Total Cases</b>: {:,} <br> <b>Total Deaths</b>: {:,}""".format(latest_date,cases_tests.iloc[-1]['totalSamplesTested'].astype('int64'), cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum(), cases_summary[cases_summary['day']==latest_date]['deaths'].sum()),
 width=200, height=100)
@@ -641,8 +589,6 @@ z.add_layout(LinearAxis(y_range_name='tests_growth_rate'), 'right')
 
 sample_test_growth=z.vbar(x=cases_tests['timestamp'],top=cases_tests['totalSamplesTested'].pct_change() , width=timedelta(days=0.5), color='#5e4fa2', alpha=1, y_range_name='tests_growth_rate', legend_label='Tests Growth Rate')
 sample_test=z.line(cases_tests['timestamp'], cases_tests['daily_tests'], line_width=2, color='#d53e4f', alpha=1, legend_label="Daily Tests Count")
-
-#cases_summary['day']=cases_summary['day'].astype('str')
 
 hover = HoverTool(line_policy='next', renderers=[sample_test_growth])
 hover.tooltips = [('Date', '@x{%F}'),
@@ -677,7 +623,7 @@ tab10 = Panel(child=layout, title="All India Tests Growth Rate")
 
 #Correlation between Tests Count and Confirmed Cases
 
-cases_tests=cases_tests.dropna(axis=0, how='any')
+cases_tests_without_na=cases_tests.dropna(axis=0, how='any')
 
 fig=figure(plot_width=1200, plot_height=700,sizing_mode="scale_both")
 fig.title.text='Correlation of Tests Vs Confirmed Cases'
@@ -685,18 +631,18 @@ fig.title.align='center'
 fig.title.text_font_size='17px'
 fig.xaxis.axis_label = 'Confirmed Cases'
 fig.yaxis.axis_label = 'Tests Count'
-fig.x_range=Range1d(0,cases_tests['daily_confirmed'].max() )
+fig.x_range=Range1d(0,cases_tests_without_na['daily_confirmed'].max() )
 
 
-scatterplot=fig.circle(cases_tests['daily_confirmed'],cases_tests['daily_tests'], legend_label='Daily Tests Vs Confirmed Cases')
+scatterplot=fig.circle(cases_tests_without_na['daily_confirmed'],cases_tests_without_na['daily_tests'], legend_label='Daily Tests Vs Confirmed Cases')
 
-par = np.polyfit(cases_tests['daily_confirmed'],cases_tests['daily_tests'], 1, full=True)
+par = np.polyfit(cases_tests_without_na['daily_confirmed'],cases_tests_without_na['daily_tests'], 1, full=True)
 slope=par[0][0]
 intercept=par[0][1]
-y_predicted = [slope*i + intercept  for i in cases_tests['daily_confirmed']]
+y_predicted = [slope*i + intercept  for i in cases_tests_without_na['daily_confirmed']]
 
-LinearRegression = fig.line(cases_tests['daily_confirmed'],y_predicted,color='red',legend_label='y='+str(round(slope,2))+'x+'+str(round(intercept,2)))
-correlation=cases_tests[['daily_confirmed','daily_tests']].corr('pearson')['daily_tests'][0]
+LinearRegression = fig.line(cases_tests_without_na['daily_confirmed'],y_predicted,color='red',legend_label='y='+str(round(slope,2))+'x+'+str(round(intercept,2)))
+correlation=cases_tests_without_na[['daily_confirmed','daily_tests']].corr('pearson')['daily_tests'][0]
 
 hover = HoverTool(line_policy='next', renderers=[scatterplot])
 hover.tooltips = [('Confirmed Cases', '@x'),
@@ -734,7 +680,7 @@ layout = column(layout,div, sizing_mode='scale_both')
 
 tab11 = Panel(child=layout, title="Correlation - Tests Vs Cases")
 
-tabs = Tabs(tabs=[tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11])
+tabs = Tabs(tabs=[tab1, tab2, tab3,  tab4, tab5, tab6,  tab7, tab8, tab9, tab10, tab11])
 
 #output_file('Statewise Cases and Deaths-Bokeh.html')
 
