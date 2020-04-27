@@ -761,4 +761,4 @@ script, div = components(tabs, CDN)
 curdoc().template_variables["script"] = script
 curdoc().template_variables["div"] = div
 
-bokeh_doc.add_root(tabs)
+#bokeh_doc.add_root(tabs)
