@@ -530,9 +530,6 @@ cases_summary['daily_case_growth']=cases_summary['discharged'].groupby(cases_sum
 
 for name, color in zip(cases_summary['loc'].unique(), itertools.cycle(Spectral11)):
     cases_summary['day'] = pd.to_datetime(cases_summary['day'])
-    #cases_summary['daily deaths'] = cases_summary[cases_summary['loc'] == name]['deaths'].diff(1)
-    #cases_summary['daily discharged'] = cases_summary[cases_summary['loc'] == name]['discharged'].diff(1)
-    #cases_summary['daily_death_growth'] = cases_summary[cases_summary['loc'] == name]['daily deaths'] / cases_summary[cases_summary['loc'] == name]['deaths']
     renderer=x.line(cases_summary[cases_summary['loc']==name]['day'], cases_summary[cases_summary['loc']==name]['deaths'].pct_change(), line_width=2, color=color, alpha=1,
           muted_alpha=0.2)
 
@@ -559,9 +556,6 @@ hover.tooltips = [('Date', '@x{%F}'),
 hover.formatters = {'@x': 'datetime'}
 x.add_tools(hover)
 
-#citation = Label(x=0, y=0, x_units='screen', y_units='screen',
-#                 text='Last Updated : {}'.format(latest_date), render_mode='css', text_font_size='12px')
-#x.add_layout(citation, 'above')
 
 div1 = Div(text="""<b>Source:</b>
                 COVID-19 REST API for India: <a href='https://api.rootnet.in/covid19-in/stats/history' target="_blank"> The Ministry of Health and Family Welfare</a> """,
@@ -614,9 +608,7 @@ hover_pos.formatters = {'@x': 'datetime'}
 y.add_tools(hover)
 y.add_tools(hover_pos)
 y.legend.location='top_left'
-#citation = Label(x=0, y=0, x_units='screen', y_units='screen',
-#                 text='Last Updated : {}'.format(latest_date), render_mode='css', text_font_size='12px')
-#y.add_layout(citation, 'above')
+
 
 div = Div(text="""<b>Latest Date</b>: {} <br> <br> <b>Total Tests</b>: {:,} <br><br> <b>Total Cases</b>: {:,} <br> <b>Total Deaths</b>: {:,}""".format(latest_date,cases_tests.iloc[-1]['totalSamplesTested'].astype('int64'), cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum(), cases_summary[cases_summary['day']==latest_date]['deaths'].sum()),
 width=200, height=100)
@@ -668,10 +660,6 @@ z.add_tools(hover)
 z.add_tools(hover_growth)
 z.legend.click_policy='hide'
 z.legend.title='Click to Switch Legend ON/OFF'
-
-#citation = Label(x=0, y=0, x_units='screen', y_units='screen',
-#                 text='Last Updated : {}'.format(latest_date), render_mode='css', text_font_size='12px')
-#z.add_layout(citation, 'above')
 
 div = Div(text="""<b>Latest Date</b>: {} <br><br> <b>Total Tests</b>: {:,} <br><br> <b>Total Cases</b>: {:,} <br> <b>Total Deaths</b>: {:,}""".format(latest_date,cases_tests.iloc[-1]['totalSamplesTested'].astype('int64'), cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum(), cases_summary[cases_summary['day']==latest_date]['deaths'].sum()),
 width=200, height=100)
