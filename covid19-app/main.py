@@ -753,7 +753,7 @@ layout = column(layout,div, sizing_mode='scale_both')
 tab11 = Panel(child=layout, title="Correlation - Tests Vs Cases")
 
 tabs = Tabs(tabs=[tab1, tab2, tab3,  tab4, tab5, tab6,  tab7, tab8, tab9, tab10, tab11])
-#bokeh_doc.add_root(tabs)
+bokeh_doc.add_root(tabs)
 
 
 #output_file('Statewise Cases and Deaths-Bokeh.html')
