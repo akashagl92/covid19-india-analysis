@@ -748,46 +748,7 @@ tab11 = Panel(child=layout, title="Correlation - Tests Vs Cases")
 
 tabs = Tabs(tabs=[tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11])
 
-output_file('Statewise Cases and Deaths-Bokeh.html')
-show(tabs)
+#output_file('Statewise Cases and Deaths-Bokeh.html')
 
 bokeh_doc.add_root(tabs)
-
-
-#cases_summary = requests.get('https://api.rootnet.in/covid19-in/stats/history')
-#
-#json_data = cases_summary.json()
-#cases_summary=pd.json_normalize(json_data['data'], record_path='regional', meta='day')
-#
-#cases_summary['loc']=np.where(cases_summary['loc']=='Nagaland#', 'Nagaland', cases_summary['loc'])
-#
-#latest_date=cases_summary['day'].max()
-#highest_state=cases_summary[cases_summary['totalConfirmed']==cases_summary['totalConfirmed'].max()]['loc'].tolist()[0]
-#
-#plot=figure(plot_width=1200, plot_height=700, x_axis_type="datetime",  sizing_mode="scale_both")
-#plot.title.text='COVID19 India Analysis Dashboard'
-#plot.title.align='center'
-#plot.title.text_font_size='17px'
-##plot.xaxis.axis_label = 'Date'
-##plot.yaxis.axis_label = 'Number of Cases'
-
-
-
-
-
-
-
-
-#from bokeh.events import ButtonClick
-#from bokeh.models import Button
-#
-#def callback(event):
-#    print('Python:Click')
-#
-#button = Button(label="TEST")
-#
-#button.on_event(ButtonClick, callback)
-
-#layout=row(plot, button)
-#show(layout)
 
