@@ -191,7 +191,9 @@ s.yaxis.axis_label = 'Case-to-Death Ratio'
 cases_summary['case-death-ratio']=cases_summary['totalConfirmed']/cases_summary['deaths']
 cases_summary['case-death-ratio']=cases_summary['case-death-ratio'].replace(np.inf,0)
 cases_summary['case-death-ratio']=cases_summary['case-death-ratio'].replace(np.nan,0)
-
+cases_summary['fatality_rate']=1/cases_summary['case-death-ratio']
+cases_summary['fatality_rate']=cases_summary['fatality_rate'].replace(np.inf,0)
+cases_summary['fatality_rate']=cases_summary['fatality_rate'].replace(np.nan,0)
 
 for name, color in zip(cases_summary['loc'].unique(), itertools.cycle(Spectral11)):
     cases_summary['day'] = pd.to_datetime(cases_summary['day'])
@@ -235,9 +237,9 @@ tab3 = Panel(child=fig, title="Cases-to-Death Ratio over Time - Statewise" )
 cases_summary['case-death-ratio']=cases_summary['case-death-ratio'].replace(np.inf,0)
 cases_summary['case-death-ratio']=cases_summary['case-death-ratio'].replace(np.nan,0)
 
-cases_summary_latest_date=cases_summary[cases_summary['day']==latest_date][['loc','case-death-ratio']].reset_index()
+cases_summary_latest_date=cases_summary[cases_summary['day']==latest_date][['loc','case-death-ratio', 'totalConfirmed', 'deaths', 'discharged', 'fatality_rate']].reset_index()
 highest_case_death_ratio_state=cases_summary_latest_date[cases_summary_latest_date['case-death-ratio']==cases_summary_latest_date['case-death-ratio'].max()]['loc'].tolist()[0]
-
+highest_fatality_rate_state=cases_summary_latest_date[cases_summary_latest_date['fatality_rate']==cases_summary_latest_date['fatality_rate'].max()]['loc'].tolist()[0]
 source=ColumnDataSource(cases_summary_latest_date)
 
 t = figure(x_range=cases_summary_latest_date['loc'],plot_width=1200, plot_height=700,  sizing_mode="scale_both")
@@ -262,8 +264,8 @@ div1 = Div(text="""<b>Latest Date</b>: {} <br> <br>
                 <b>Total Cases</b>: {:,} <br> 
                 <b>Total Deaths</b>: {:,} <br> 
                  <b>Total Recovered</b>: {:,} <br> <br>
-                <b>{} </b> has {:,} cases with the highest number of cases per death: {:.2f} <br><br> 
-                <b>{} </b> has the highest number of cases of {:,} with {:.2f} cases per death. """
+                <b>{} </b> has {:,} cases having 1 death in {:.2f} cases (the highest of all the states). <br><br> 
+                <b>{} </b> has the highest number of cases of {:,} having 1 death in {:.2f} cases. """
           .format(latest_date,cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum(),
                   cases_summary[cases_summary['day']==latest_date]['deaths'].sum(),
                   cases_summary[cases_summary['day']==latest_date]['discharged'].sum(),
@@ -273,26 +275,69 @@ div1 = Div(text="""<b>Latest Date</b>: {} <br> <br>
                   highest_state,
                   cases_summary[cases_summary['loc']==highest_state]['totalConfirmed'][-1:].tolist()[0],
                   cases_summary_latest_date[cases_summary_latest_date['loc']==highest_state]['case-death-ratio'].tolist()[0]),
-width=200, height=280)
+width=200, height=280, margin=(30,0,0,20))
 
-div2=Div(text="""<b>Top 6 states with highest cases per death</b>: <br> {} <br> {} <br> {} <br> {} <br> {} <br> {} <br>"""
+div2=Div(text="""<b>Top 6 states with highest cases per death (1/fatality-rate)</b>: <br><br> {} <br> {} <br> {} <br> {} <br> {} <br> {} <br>"""
            .format(cases_summary_latest_date.sort_values('case-death-ratio',ascending=False)['loc'].head(6).tolist()[0],
                    cases_summary_latest_date.sort_values('case-death-ratio',ascending=False)['loc'].head(6).tolist()[1],
                    cases_summary_latest_date.sort_values('case-death-ratio',ascending=False)['loc'].head(6).tolist()[2],
                    cases_summary_latest_date.sort_values('case-death-ratio',ascending=False)['loc'].head(6).tolist()[3],
                    cases_summary_latest_date.sort_values('case-death-ratio',ascending=False)['loc'].head(6).tolist()[4],
                    cases_summary_latest_date.sort_values('case-death-ratio',ascending=False)['loc'].head(6).tolist()[5]),
- width=200, height=200)
+ width=200, height=200, margin=(0,0,0,20))
 
 layout = column(div1, div2)
-layout= row(t,layout)
+layout1= row(t,layout)
+
+a = figure(x_range=cases_summary_latest_date['loc'],plot_width=1200, plot_height=700,  sizing_mode="scale_both")
+a.title.text='Statewise Fatality Rate'
+a.title.align='center'
+a.title.text_font_size='17px'
+a.xaxis.axis_label = 'States'
+a.yaxis.axis_label = 'Fatality Rate (%)'
+a.xaxis.major_label_orientation = math.pi/2
+
+#top_states=cases_summary['case-death-ratio'].sort_values(ascending=False)['loc']
+
+a.vbar(cases_summary_latest_date['loc'],top=cases_summary_latest_date['fatality_rate'], width=0.9, color=[color for name, color in zip(cases_summary_latest_date['loc'], itertools.cycle(Spectral11))])
+
+hover = HoverTool(line_policy='next')
+hover.tooltips = [('State', '@x'),
+                  ('fatality-rate', '@top{:.2%}')  # @$name gives the value corresponding to the legend
+]
+a.add_tools(hover)
+
+div3 = Div(text="""<b>Highest Fatality Rate: </b><br><br>
+            <b>{} </b> - {:,} deaths in {:,} cases. <br><br> 
+            <b>Fatality Rate of state with highest cases: </b><br><br>
+            <b>{} </b> - {:,} deaths in {:,} cases.<br><br> """
+          .format(highest_fatality_rate_state,
+                  cases_summary[cases_summary['loc']==highest_fatality_rate_state]['deaths'][-1:].tolist()[0],
+                  cases_summary[cases_summary['loc']==highest_fatality_rate_state]['totalConfirmed'][-1:].tolist()[0],
+                  highest_state,
+                  cases_summary[cases_summary['loc']==highest_state]['deaths'][-1:].tolist()[0],
+                  cases_summary_latest_date[cases_summary_latest_date['loc']==highest_state]['totalConfirmed'].tolist()[0]),
+width=200, height=280, margin=(30,0,0,20))
+
+
+div4=Div(text="""<b>Top 6 states with highest fatality-rate</b>: <br><br> {} <br> {} <br> {} <br> {} <br> {} <br> {} <br>"""
+           .format(cases_summary_latest_date.sort_values('fatality_rate',ascending=False)['loc'].head(6).tolist()[0],
+                   cases_summary_latest_date.sort_values('fatality_rate',ascending=False)['loc'].head(6).tolist()[1],
+                   cases_summary_latest_date.sort_values('fatality_rate',ascending=False)['loc'].head(6).tolist()[2],
+                   cases_summary_latest_date.sort_values('fatality_rate',ascending=False)['loc'].head(6).tolist()[3],
+                   cases_summary_latest_date.sort_values('fatality_rate',ascending=False)['loc'].head(6).tolist()[4],
+                   cases_summary_latest_date.sort_values('fatality_rate',ascending=False)['loc'].head(6).tolist()[5]),
+ width=200, height=200, margin=(10,0,0,20))
 
 div = Div(text="""<b>Source:</b>
                 COVID-19 REST API for India: <a href='https://api.rootnet.in/covid19-in/stats/history' target="_blank"> The Ministry of Health and Family Welfare</a> """,
 width=300, height=50, align='start')
 
-layout = column(layout,div, sizing_mode='scale_both')
+layout2=row(a,column(div3,div4))
+layout1=column(layout1, margin=(0,0,40,0))
+layout=column(layout1, layout2)
 
+layout = column(layout,div, sizing_mode='scale_both')
 
 tab4 = Panel(child=layout, title="Case-to-Death Ratio - Statewise" )
 
@@ -754,7 +799,7 @@ tab11 = Panel(child=layout, title="Correlation - Tests Vs Cases")
 
 tabs = Tabs(tabs=[tab1, tab2, tab3,  tab4, tab5, tab6,  tab7, tab8, tab9, tab10, tab11])
 bokeh_doc.add_root(tabs)
-
+#show(tabs)
 
 #output_file('Statewise Cases and Deaths-Bokeh.html')
 script, div = components(tabs, CDN)
