@@ -73,7 +73,7 @@ for name, color in zip(cases_summary['loc'].unique(), itertools.cycle(Dark2_8)):
 
     renderer_yhat_bold = a.line(cases_summary[cases_summary['loc'] == name]['totalConfirmed'],
                            yhat, line_width=2, color=color, alpha=1,
-                           muted_alpha=0.3)
+                           muted_alpha=0.15)
 
     renderer_yhat.visible = False
     renderer_yhat_bold.muted = True
