@@ -90,8 +90,8 @@ citation = Label(x=0, y=0, x_units='screen', y_units='screen',
 
 a.add_layout(citation, 'above')
 
-citation = Label(x=503, y=-20, x_units='screen', y_units='screen',
-                 text='The data has been smoothened using Savitzky-Golay filter with a polynomial of degree 3', render_mode='css', text_font_size='14px', text_align='right')
+citation = Label(x=518, y=-20, x_units='screen', y_units='screen',
+                 text='The data has been smoothened using Savitzky-Golay filter with a polynomial of 3rd degree.', render_mode='css', text_font_size='14px', text_align='right')
 
 a.add_layout(citation, 'below')
 daily_stats1 = Label(x=-300, y=550, x_units='screen', y_units='screen',
