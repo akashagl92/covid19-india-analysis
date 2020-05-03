@@ -16,7 +16,7 @@ from bokeh.models import ColumnDataSource, Legend, LegendItem, Scatter, Label
 from bokeh.plotting import figure, output_file, show, output_notebook, curdoc
 from bokeh.models.tools import HoverTool
 from bokeh.core.properties import value
-from bokeh.palettes import Spectral11
+from bokeh.palettes import Spectral11, Dark2_8
 import itertools
 from bokeh.layouts import row, column
 from bokeh.models.annotations import Title
@@ -26,6 +26,8 @@ from bokeh.models import LinearAxis, Range1d
 from bokeh.models import Div
 from bokeh.embed import components
 from bokeh.resources import CDN
+from scipy.signal import savgol_filter
+
 
 bokeh_doc=curdoc()
 
@@ -35,10 +37,82 @@ json_data = cases_summary.json()
 cases_summary=pd.json_normalize(json_data['data'], record_path='regional', meta='day')
 
 cases_summary['loc']=np.where(cases_summary['loc']=='Nagaland#', 'Nagaland', cases_summary['loc'])
+cases_summary['loc']=np.where(cases_summary['loc']=='Madhya Pradesh#', 'Madhya Pradesh', cases_summary['loc'])
+cases_summary['loc']=np.where(cases_summary['loc']=='Jharkhand#', 'Jharkhand', cases_summary['loc'])
 
 latest_date=cases_summary['day'].max()
 highest_state=cases_summary[cases_summary['totalConfirmed']==cases_summary['totalConfirmed'].max()]['loc'].tolist()[0]
 
+cases_summary['newConfirmed']=cases_summary['totalConfirmed'].groupby(cases_summary['loc']).diff(1)
+
+#Cases Trends - Statewise
+
+a = figure(plot_width=1200, plot_height=600,  sizing_mode="scale_both", name="All cases - Statewise")
+a.title.text='New Confirmed Case Trends'
+a.title.align='center'
+a.title.text_font_size='17px'
+a.xaxis.axis_label = 'Total Confirmed Cases'
+a.yaxis.axis_label = 'New Confirmed Cases'
+
+legend_it=[]
+
+for name, color in zip(cases_summary['loc'].unique(), itertools.cycle(Dark2_8)):
+
+    length=len(cases_summary[cases_summary['loc'] == name]['newConfirmed'])
+    def window_size(length):
+        if ((length // 2) % 2 == 1):
+            return length // 2
+        else:
+            return (length // 2) + 1
+
+    yhat = savgol_filter(cases_summary[cases_summary['loc'] == name]['newConfirmed'],window_size(length), 3)
+
+    renderer_yhat = a.line(cases_summary[cases_summary['loc'] == name]['totalConfirmed'],
+                      yhat, line_width=2, color=color, alpha=1,
+                      muted_alpha=0.1)
+
+    renderer_yhat_bold = a.line(cases_summary[cases_summary['loc'] == name]['totalConfirmed'],
+                           yhat, line_width=2, color=color, alpha=1,
+                           muted_alpha=0.3)
+
+    renderer_yhat.visible = False
+    renderer_yhat_bold.muted = True
+
+    legend_it.append((name, [renderer_yhat]))
+
+legend1=Legend(items=legend_it[0:16], location=(10,21), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
+legend2=Legend(items=legend_it[16:33], location=(10,0), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
+a.add_layout(legend1,'right')
+a.add_layout(legend2,'right')
+
+citation = Label(x=0, y=0, x_units='screen', y_units='screen',
+                 text='Last Updated : {}'.format(latest_date), render_mode='css', text_font_size='12px')
+
+a.add_layout(citation, 'above')
+
+citation = Label(x=503, y=-20, x_units='screen', y_units='screen',
+                 text='The data has been smoothened using Savitzky-Golay filter with a polynomial of degree 3', render_mode='css', text_font_size='14px', text_align='right')
+
+a.add_layout(citation, 'below')
+daily_stats1 = Label(x=-300, y=550, x_units='screen', y_units='screen',
+                 text='Total Cases : {:,}'.format(cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum()), render_mode='css', text_font_size='14px', text_align='right')
+daily_stats2 = Label(x=-321, y=520, x_units='screen', y_units='screen',
+                 text='Total Deaths : {:,}'.format(cases_summary[cases_summary['day']==latest_date]['deaths'].sum()), render_mode='css', text_font_size='14px', text_align='right')
+daily_stats3 = Label(x=-305, y=490, x_units='screen', y_units='screen',
+                 text='Total Discharged : {:,}'.format(cases_summary[cases_summary['day']==latest_date]['discharged'].sum()), render_mode='css', text_font_size='14px', text_align='right')
+
+a.add_layout(daily_stats1, 'right')
+a.add_layout(daily_stats2, 'right')
+a.add_layout(daily_stats3, 'right')
+
+div = Div(text="""<br><br><b>Source:</b>
+                COVID-19 REST API for India: <a href='https://api.rootnet.in/covid19-in/stats/history' target="_blank"> The Ministry of Health and Family Welfare</a> """,
+width=300, height=50, align='start')
+
+fig1 = column(a,div, sizing_mode='scale_both')
+tab12 = Panel(child=fig1, title="Case Trends - Statewise")
+
+#Statewise Cases Over Time
 legend_it=[]
 
 p = figure(plot_width=1200, plot_height=600, x_axis_type="datetime",  sizing_mode="scale_both")
@@ -49,7 +123,7 @@ p.xaxis.axis_label = 'Date'
 p.yaxis.axis_label = 'Number of Cases'
 
 
-for name, color in zip(cases_summary['loc'].unique(), itertools.cycle(Spectral11)):
+for name, color in zip(cases_summary['loc'].unique(), itertools.cycle(Dark2_8)):
     cases_summary['day'] = pd.to_datetime(cases_summary['day'])
     renderer=p.line(cases_summary[cases_summary['loc']==name]['day'], cases_summary[cases_summary['loc']==name]['totalConfirmed'], line_width=2, color=color, alpha=1,
           muted_alpha=0.2)
@@ -58,8 +132,8 @@ for name, color in zip(cases_summary['loc'].unique(), itertools.cycle(Spectral11
 
     legend_it.append((name, [renderer]))
 
-legend1=Legend(items=legend_it[0:16], location=(10,0), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
-legend2=Legend(items=legend_it[17:33], location=(10,0), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
+legend1=Legend(items=legend_it[0:16], location=(10,21), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
+legend2=Legend(items=legend_it[16:33], location=(10,0), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
 
 p.add_layout(legend1,'right')
 p.add_layout(legend2,'right')
@@ -73,6 +147,17 @@ hover.tooltips = [('Date', '@x{%F}'),
 ]
 hover.formatters = {'@x': 'datetime'}
 p.add_tools(hover)
+
+daily_stats1 = Label(x=-300, y=550, x_units='screen', y_units='screen',
+                 text='Total Cases : {:,}'.format(cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum()), render_mode='css', text_font_size='14px', text_align='right')
+daily_stats2 = Label(x=-321, y=520, x_units='screen', y_units='screen',
+                 text='Total Deaths : {:,}'.format(cases_summary[cases_summary['day']==latest_date]['deaths'].sum()), render_mode='css', text_font_size='14px', text_align='right')
+daily_stats3 = Label(x=-305, y=490, x_units='screen', y_units='screen',
+                 text='Total Discharged : {:,}'.format(cases_summary[cases_summary['day']==latest_date]['discharged'].sum()), render_mode='css', text_font_size='14px', text_align='right')
+
+p.add_layout(daily_stats1, 'right')
+p.add_layout(daily_stats2, 'right')
+p.add_layout(daily_stats3, 'right')
 
 citation = Label(x=0, y=0, x_units='screen', y_units='screen',
                  text='Last Updated : {}'.format(latest_date), render_mode='css', text_font_size='12px')
@@ -96,7 +181,7 @@ q.title.text_font_size='17px'
 q.xaxis.axis_label = 'Date'
 q.yaxis.axis_label = 'Number of Deaths'
 
-for name, color in zip(cases_summary['loc'].unique(), itertools.cycle(Spectral11)):
+for name, color in zip(cases_summary['loc'].unique(), itertools.cycle(Dark2_8)):
     cases_summary['day'] = pd.to_datetime(cases_summary['day'])
     renderer=q.line(cases_summary[cases_summary['loc']==name]['day'], cases_summary[cases_summary['loc']==name]['deaths'], line_width=2, color=color, alpha=1,
           muted_alpha=0.2)
@@ -105,8 +190,8 @@ for name, color in zip(cases_summary['loc'].unique(), itertools.cycle(Spectral11
 
     legend_it.append((name, [renderer]))
 
-legend1=Legend(items=legend_it[0:16], location=(10,0), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
-legend2=Legend(items=legend_it[17:33], location=(10,0), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
+legend1=Legend(items=legend_it[0:16], location=(10,21), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
+legend2=Legend(items=legend_it[16:33], location=(10,0), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
 
 q.add_layout(legend1,'right')
 q.add_layout(legend2,'right')
@@ -119,6 +204,19 @@ hover.tooltips = [('Date', '@x{%F}'),
 ]
 hover.formatters = {'@x': 'datetime'}
 q.add_tools(hover)
+
+
+daily_stats1 = Label(x=-300, y=550, x_units='screen', y_units='screen',
+                 text='Total Cases : {:,}'.format(cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum()), render_mode='css', text_font_size='14px', text_align='right')
+daily_stats2 = Label(x=-321, y=520, x_units='screen', y_units='screen',
+                 text='Total Deaths : {:,}'.format(cases_summary[cases_summary['day']==latest_date]['deaths'].sum()), render_mode='css', text_font_size='14px', text_align='right')
+daily_stats3 = Label(x=-305, y=490, x_units='screen', y_units='screen',
+                 text='Total Discharged : {:,}'.format(cases_summary[cases_summary['day']==latest_date]['discharged'].sum()), render_mode='css', text_font_size='14px', text_align='right')
+
+q.add_layout(daily_stats1, 'right')
+q.add_layout(daily_stats2, 'right')
+q.add_layout(daily_stats3, 'right')
+
 
 citation = Label(x=0, y=0, x_units='screen', y_units='screen',
                  text='Last Updated : {}'.format(latest_date), render_mode='css', text_font_size='12px')
@@ -143,7 +241,7 @@ tab2 = Panel(child=fig, title="All Deaths - Statewise")
 #r.yaxis.axis_label = 'cases/deaths'
 #
 #
-#for name, color in zip(cases_summary['loc'].unique(), itertools.cycle(Spectral11)):
+#for name, color in zip(cases_summary['loc'].unique(), itertools.cycle(Dark2_8)):
 #    cases_summary['day'] = pd.to_datetime(cases_summary['day'])
 #    renderer=r.line(cases_summary[cases_summary['loc']==name]['day'], cases_summary[cases_summary['loc']==name]['totalconfirmed'], line_width=2, color=color, alpha=1,
 #          muted_alpha=0.2, line_color=color)
@@ -195,7 +293,7 @@ cases_summary['fatality_rate']=1/cases_summary['case-death-ratio']
 cases_summary['fatality_rate']=cases_summary['fatality_rate'].replace(np.inf,0)
 cases_summary['fatality_rate']=cases_summary['fatality_rate'].replace(np.nan,0)
 
-for name, color in zip(cases_summary['loc'].unique(), itertools.cycle(Spectral11)):
+for name, color in zip(cases_summary['loc'].unique(), itertools.cycle(Dark2_8)):
     cases_summary['day'] = pd.to_datetime(cases_summary['day'])
     renderer=s.line(cases_summary[cases_summary['loc']==name]['day'], cases_summary[cases_summary['loc']==name]['case-death-ratio'], line_width=2, color=color, alpha=1,
           muted_alpha=0.2)
@@ -204,8 +302,8 @@ for name, color in zip(cases_summary['loc'].unique(), itertools.cycle(Spectral11
 
     legend_it.append((name, [renderer]))
 
-legend1=Legend(items=legend_it[0:16], location=(10,0), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
-legend2=Legend(items=legend_it[17:33], location=(10,0), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
+legend1=Legend(items=legend_it[0:16], location=(10,21), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
+legend2=Legend(items=legend_it[16:33], location=(10,0), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
 
 s.add_layout(legend1,'right')
 s.add_layout(legend2,'right')
@@ -218,6 +316,18 @@ hover.tooltips = [('Date', '@x{%F}'),
 ]
 hover.formatters = {'@x': 'datetime'}
 s.add_tools(hover)
+
+
+daily_stats1 = Label(x=-300, y=550, x_units='screen', y_units='screen',
+                 text='Total Cases : {:,}'.format(cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum()), render_mode='css', text_font_size='14px', text_align='right')
+daily_stats2 = Label(x=-321, y=520, x_units='screen', y_units='screen',
+                 text='Total Deaths : {:,}'.format(cases_summary[cases_summary['day']==latest_date]['deaths'].sum()), render_mode='css', text_font_size='14px', text_align='right')
+daily_stats3 = Label(x=-305, y=490, x_units='screen', y_units='screen',
+                 text='Total Discharged : {:,}'.format(cases_summary[cases_summary['day']==latest_date]['discharged'].sum()), render_mode='css', text_font_size='14px', text_align='right')
+
+s.add_layout(daily_stats1, 'right')
+s.add_layout(daily_stats2, 'right')
+s.add_layout(daily_stats3, 'right')
 
 citation = Label(x=0, y=0, x_units='screen', y_units='screen',
                  text='Last Updated : {}'.format(latest_date), render_mode='css', text_font_size='12px')
@@ -252,13 +362,14 @@ t.xaxis.major_label_orientation = math.pi/2
 
 #top_states=cases_summary['case-death-ratio'].sort_values(ascending=False)['loc']
 
-t.vbar(cases_summary_latest_date['loc'],top=cases_summary_latest_date['case-death-ratio'], width=0.9, color=[color for name, color in zip(cases_summary_latest_date['loc'], itertools.cycle(Spectral11))])
+t.vbar(cases_summary_latest_date['loc'],top=cases_summary_latest_date['case-death-ratio'], width=0.9, color=[color for name, color in zip(cases_summary_latest_date['loc'], itertools.cycle(Dark2_8))])
 
 hover = HoverTool(line_policy='next')
 hover.tooltips = [('State', '@x'),
                   ('Case-to-Death ratio', '@top')  # @$name gives the value corresponding to the legend
 ]
 t.add_tools(hover)
+
 
 div1 = Div(text="""<b>Latest Date</b>: {} <br> <br>
                 <b>Total Cases</b>: {:,} <br> 
@@ -299,7 +410,7 @@ a.xaxis.major_label_orientation = math.pi/2
 
 #top_states=cases_summary['case-death-ratio'].sort_values(ascending=False)['loc']
 
-a.vbar(cases_summary_latest_date['loc'],top=cases_summary_latest_date['fatality_rate'], width=0.9, color=[color for name, color in zip(cases_summary_latest_date['loc'], itertools.cycle(Spectral11))])
+a.vbar(cases_summary_latest_date['loc'],top=cases_summary_latest_date['fatality_rate'], width=0.9, color=[color for name, color in zip(cases_summary_latest_date['loc'], itertools.cycle(Dark2_8))])
 
 hover = HoverTool(line_policy='next')
 hover.tooltips = [('State', '@x'),
@@ -419,7 +530,7 @@ div = Div(text="""<b>Latest Date</b>: {} <br> <br>
                   cases_summary['daily deaths'].max().astype('int64'),
                   cases_summary[cases_summary['daily discharged'] == cases_summary['daily discharged'].max()]['day'].tolist()[0],
                   cases_summary['daily discharged'].max().astype('int64')),
-width=200, height=100)
+width=200, height=100,  margin=(30,0,0,20))
 layout = row(u, div)
 
 div = Div(text="""<b>Source:</b>
@@ -491,7 +602,7 @@ div = Div(text="""<b>Latest Date</b>: {} <br> <b>Total Cases</b>: {:,} <br> <b>T
                 <b> Recovery Rate</b>: {:.2%}"""
                 .format(latest_date,cases_summary.iloc[-1]['total'],cases_summary.iloc[-1]['deaths'],cases_summary.iloc[-1]['daily_case_growth'],cases_summary.iloc[-1]['daily_death_growth'],cases_summary.iloc[-1]['daily_discharge_growth'],
                                                     (cases_summary['deaths'][-1:] / cases_summary['total'][-1:]).tolist()[0], (cases_summary['discharged'][-1:]/cases_summary['total'][-1:]).tolist()[0] ),
-width=200, height=100)
+width=200, height=100, margin=(30,0,0,20))
 layout = row(v, div)
 
 div = Div(text="""<b>Source:</b>
@@ -524,7 +635,7 @@ cases_summary['daily_death_growth']=cases_summary['deaths'].groupby(cases_summar
 cases_summary['daily_case_growth']=cases_summary['discharged'].groupby(cases_summary['loc']).pct_change()
 
 
-for name, color in zip(cases_summary['loc'].unique(), itertools.cycle(Spectral11)):
+for name, color in zip(cases_summary['loc'].unique(), itertools.cycle(Dark2_8)):
     cases_summary['day'] = pd.to_datetime(cases_summary['day'])
     #cases_summary['daily confirmed'] = cases_summary[cases_summary['loc'] == name]['totalConfirmed'].diff(1)
     renderer=w.line(cases_summary[cases_summary['loc']==name]['day'], cases_summary[cases_summary['loc']==name]['totalConfirmed'].pct_change(), line_width=2, color=color, alpha=1,
@@ -552,9 +663,21 @@ hover.tooltips = [('Date', '@x{%F}'),
 hover.formatters = {'@x': 'datetime'}
 w.add_tools(hover)
 
-#citation = Label(x=0, y=0, x_units='screen', y_units='screen',
-#                 text='Last Updated : {}'.format(latest_date), render_mode='css', text_font_size='12px')
-#w.add_layout(citation, 'above')
+citation = Label(x=0, y=0, x_units='screen', y_units='screen',
+                 text='Last Updated : {}'.format(latest_date), render_mode='css', text_font_size='12px')
+
+w.add_layout(citation, 'above')
+
+daily_stats1 = Label(x=-300, y=550, x_units='screen', y_units='screen',
+                 text='Total Cases : {:,}'.format(cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum()), render_mode='css', text_font_size='14px', text_align='right')
+daily_stats2 = Label(x=-321, y=520, x_units='screen', y_units='screen',
+                 text='Total Deaths : {:,}'.format(cases_summary[cases_summary['day']==latest_date]['deaths'].sum()), render_mode='css', text_font_size='14px', text_align='right')
+daily_stats3 = Label(x=-305, y=490, x_units='screen', y_units='screen',
+                text='Total Discharged : {:,}'.format(cases_summary[cases_summary['day']==latest_date]['discharged'].sum()), render_mode='css', text_font_size='14px', text_align='right')
+
+w.add_layout(daily_stats1, 'right')
+w.add_layout(daily_stats2, 'right')
+w.add_layout(daily_stats3, 'right')
 
 div1 = Div(text="""<b>Source:</b>
                 COVID-19 REST API for India: <a href='https://api.rootnet.in/covid19-in/stats/history' target="_blank"> The Ministry of Health and Family Welfare</a> """,
@@ -582,7 +705,7 @@ cases_summary['daily_case_growth']=cases_summary['totalConfirmed'].groupby(cases
 cases_summary['daily_death_growth']=cases_summary['deaths'].groupby(cases_summary['loc']).pct_change()
 cases_summary['daily_case_growth']=cases_summary['discharged'].groupby(cases_summary['loc']).pct_change()
 
-for name, color in zip(cases_summary['loc'].unique(), itertools.cycle(Spectral11)):
+for name, color in zip(cases_summary['loc'].unique(), itertools.cycle(Dark2_8)):
     cases_summary['day'] = pd.to_datetime(cases_summary['day'])
     renderer=x.line(cases_summary[cases_summary['loc']==name]['day'], cases_summary[cases_summary['loc']==name]['deaths'].pct_change(), line_width=2, color=color, alpha=1,
           muted_alpha=0.2)
@@ -610,9 +733,21 @@ hover.tooltips = [('Date', '@x{%F}'),
 hover.formatters = {'@x': 'datetime'}
 x.add_tools(hover)
 
-#citation = Label(x=0, y=0, x_units='screen', y_units='screen',
-#                 text='Last Updated : {}'.format(latest_date), render_mode='css', text_font_size='12px')
-#x.add_layout(citation, 'above')
+citation = Label(x=0, y=0, x_units='screen', y_units='screen',
+                 text='Last Updated : {}'.format(latest_date), render_mode='css', text_font_size='12px')
+
+x.add_layout(citation, 'above')
+
+daily_stats1 = Label(x=-300, y=550, x_units='screen', y_units='screen',
+                 text='Total Cases : {:,}'.format(cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum()), render_mode='css', text_font_size='14px', text_align='right')
+daily_stats2 = Label(x=-321, y=520, x_units='screen', y_units='screen',
+                 text='Total Deaths : {:,}'.format(cases_summary[cases_summary['day']==latest_date]['deaths'].sum()), render_mode='css', text_font_size='14px', text_align='right')
+daily_stats3 = Label(x=-305, y=490, x_units='screen', y_units='screen',
+                 text='Total Discharged : {:,}'.format(cases_summary[cases_summary['day']==latest_date]['discharged'].sum()), render_mode='css', text_font_size='14px', text_align='right')
+
+x.add_layout(daily_stats1, 'right')
+x.add_layout(daily_stats2, 'right')
+x.add_layout(daily_stats3, 'right')
 
 div1 = Div(text="""<b>Source:</b>
                 COVID-19 REST API for India: <a href='https://api.rootnet.in/covid19-in/stats/history' target="_blank"> The Ministry of Health and Family Welfare</a> """,
@@ -665,12 +800,10 @@ hover_pos.formatters = {'@x': 'datetime'}
 y.add_tools(hover)
 y.add_tools(hover_pos)
 y.legend.location='top_left'
-#citation = Label(x=0, y=0, x_units='screen', y_units='screen',
-#                 text='Last Updated : {}'.format(latest_date), render_mode='css', text_font_size='12px')
-#y.add_layout(citation, 'above')
 
 div = Div(text="""<b>Latest Date</b>: {} <br> <br> <b>Total Tests</b>: {:,} <br><br> <b>Total Cases</b>: {:,} <br> <b>Total Deaths</b>: {:,}""".format(latest_date,cases_tests.iloc[-1]['totalSamplesTested'].astype('int64'), cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum(), cases_summary[cases_summary['day']==latest_date]['deaths'].sum()),
-width=200, height=100)
+width=200, height=100, margin=(30,0,0,20))
+
 layout = row(y, div)
 
 div = Div(text="""<b>Source:</b>
@@ -680,7 +813,6 @@ width=300, height=50, align='start')
 layout = column(layout,div, sizing_mode='scale_both')
 
 tab9 = Panel(child=layout, title="All India Tests over Time")
-
 
 #Testing Growth Rate
 cases_tests['timestamp']=pd.to_datetime(cases_tests['timestamp'], format=r'%Y-%m-%d')
@@ -720,12 +852,9 @@ z.add_tools(hover_growth)
 z.legend.click_policy='hide'
 z.legend.title='Click to Switch Legend ON/OFF'
 
-#citation = Label(x=0, y=0, x_units='screen', y_units='screen',
-#                 text='Last Updated : {}'.format(latest_date), render_mode='css', text_font_size='12px')
-#z.add_layout(citation, 'above')
 
 div = Div(text="""<b>Latest Date</b>: {} <br><br> <b>Total Tests</b>: {:,} <br><br> <b>Total Cases</b>: {:,} <br> <b>Total Deaths</b>: {:,}""".format(latest_date,cases_tests.iloc[-1]['totalSamplesTested'].astype('int64'), cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum(), cases_summary[cases_summary['day']==latest_date]['deaths'].sum()),
-width=200, height=100)
+width=200, height=100, margin=(30,0,0,20))
 
 layout = row(z, div)
 
@@ -785,7 +914,7 @@ div = Div(text="""<b>Latest Date</b>: {} <br><br>
                         cases_tests.iloc[-1]['totalSamplesTested'].astype('int64'),
                         cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum(),
                         correlation),
-width=200, height=100)
+width=200, height=100, margin=(30,0,0,20))
 
 layout = row(fig, div)
 
@@ -797,9 +926,9 @@ layout = column(layout,div, sizing_mode='scale_both')
 
 tab11 = Panel(child=layout, title="Correlation - Tests Vs Cases")
 
-tabs = Tabs(tabs=[tab1, tab2, tab3,  tab4, tab5, tab6,  tab7, tab8, tab9, tab10, tab11])
-bokeh_doc.add_root(tabs)
-#show(tabs)
+tabs = Tabs(tabs=[tab12, tab1, tab2, tab3,  tab4, tab5, tab6,  tab7, tab8, tab9, tab10, tab11])
+#bokeh_doc.add_root(tabs)
+show(tabs)
 
 #output_file('Statewise Cases and Deaths-Bokeh.html')
 script, div = components(tabs, CDN)
