@@ -802,8 +802,12 @@ y.add_tools(hover)
 y.add_tools(hover_pos)
 y.legend.location='top_left'
 
-div = Div(text="""<b>Latest Date</b>: {} <br> <br> <b>Total Tests</b>: {:,} <br><br> <b>Total Cases</b>: {:,} <br> <b>Total Deaths</b>: {:,} <br><br> <b>Test Positive Rate</b>: {:.2%}<br><br> This rate means that 1 confirmed positive case for every {,} tests. """.format(latest_date,cases_tests.iloc[-1]['totalSamplesTested'].astype('int64'), cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum(), cases_summary[cases_summary['day']==latest_date]['deaths'].sum(),
-             cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum()/cases_tests.iloc[-1]['totalSamplesTested'].astype('int64'), round(cases_tests.iloc[-1]['totalSamplesTested'].astype('int64')/cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum()) ),
+div=Div(text="""<b>Latest Date</b>: {} <br> <br> <b>Total Tests</b>: {:,} <br><br> <b>Total Cases</b>: {:,} <br> <b>Total Deaths</b>: {:,} <br><br> <b>Test Positive Rate</b>: {:.2%}<br><br> This rate means that 1 confirmed positive case for every {:,} tests. """
+    .format(latest_date,cases_tests.iloc[-1]['totalSamplesTested'].astype('int64'),
+            cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum(),
+            cases_summary[cases_summary['day']==latest_date]['deaths'].sum(),
+             cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum()/cases_tests.iloc[-1]['totalSamplesTested'].astype('int64'),
+            round(cases_tests.iloc[-1]['totalSamplesTested'].astype('int64')/cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum()) ),
 width=200, height=100, margin=(30,0,0,20))
 
 layout = row(y, div)
@@ -816,14 +820,12 @@ layout = column(layout,div, sizing_mode='scale_both')
 
 tab9 = Panel(child=layout, title="All India Tests over Time")
 
-
 #Testing Growth Rate
 cases_tests['timestamp']=pd.to_datetime(cases_tests['timestamp'], format=r'%Y-%m-%d')
 cases_tests['daily_tests']=cases_tests['totalSamplesTested'].diff(1)
 cases_copy=pd.DataFrame(cases_summary.groupby(['day'])['totalConfirmed'].sum().diff(1)).reset_index()
 cases_copy['day']=pd.to_datetime(cases_copy['day'])
 cases_tests=cases_tests.merge(cases_copy, how='left', left_on='timestamp',right_on='day')
-#cases_tests['daily_confirmed']=cases_summary.groupby(['loc','day'])['totalConfirmed'].sum().diff(1)
 
 
 z = figure(plot_width=1200, plot_height=700,sizing_mode="scale_both", x_axis_type='datetime', y_range=Range1d(start=0, end=cases_tests['totalSamplesTested'].max()))
@@ -858,8 +860,8 @@ z.add_tools(hover_growth)
 z.legend.click_policy='hide'
 z.legend.title='Click to Switch Legend ON/OFF'
 
-
-div = Div(text="""<b>Latest Date</b>: {} <br><br> <b>Total Tests</b>: {:,} <br><br> <b>Total Cases</b>: {:,} <br> <b>Total Deaths</b>: {:,}""".format(latest_date,cases_tests.iloc[-1]['totalSamplesTested'].astype('int64'), cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum(), cases_summary[cases_summary['day']==latest_date]['deaths'].sum()),
+div=Div(text="""<b>Latest Date</b>: {} <br> <br> <b>Total Tests</b>: {:,} <br><br> <b>Total Cases</b>: {:,} <br> <b>Total Deaths</b>: {:,} <br><br> <b>Test Positive Rate</b>: {:.2%}<br><br> This rate means that 1 confirmed positive case for every {:,} tests. """.format(latest_date,cases_tests.iloc[-1]['totalSamplesTested'].astype('int64'), cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum(), cases_summary[cases_summary['day']==latest_date]['deaths'].sum(),
+             cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum()/cases_tests.iloc[-1]['totalSamplesTested'].astype('int64'), round(cases_tests.iloc[-1]['totalSamplesTested'].astype('int64')/cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum()) ),
 width=200, height=100, margin=(30,0,0,20))
 
 layout = row(z, div)
@@ -882,7 +884,7 @@ fig.title.text='Correlation of Tests Vs Confirmed Cases'
 fig.title.align='center'
 fig.title.text_font_size='17px'
 fig.xaxis.axis_label = 'Confirmed Cases'
-fig.yaxis.axis_label = 'Tests Count'
+fig.yaxis.axis_label = 'Daily Tests Count'
 fig.x_range=Range1d(0,cases_tests_without_na['totalConfirmed'].max() )
 
 
@@ -915,10 +917,18 @@ fig.add_layout(label, 'right')
 div = Div(text="""<b>Latest Date</b>: {} <br><br> 
                 <b>Total Tests</b>: {:,} <br>
                 <b>Total Cases</b>: {:,} <br> <br>
-                <b>Pearson Correlation (R\u00b2):</b> {:.2} <br><br>"""
+                <b>Test Positive Rate</b>: {:.2%}<br>
+                This rate means that 1 confirmed positive case for every {:,} tests. <br><br>
+                <b>Pearson Correlation (R\u00b2):</b> {:.2} <br><br>
+                    For <br> 
+                     0  < R\u00b2 < 0.3  - Poor Correlation <br>
+                   0.3  < R\u00b2 < 0.75 - Moderate Correlation <br>
+                  0.75  < R\u00b2 < 1    - High Correlation <br>"""
                 .format(latest_date,
                         cases_tests.iloc[-1]['totalSamplesTested'].astype('int64'),
                         cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum(),
+                        cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum()/cases_tests.iloc[-1]['totalSamplesTested'].astype('int64'),
+                        round(cases_tests.iloc[-1]['totalSamplesTested'].astype('int64') / cases_summary[cases_summary['day'] == latest_date]['totalConfirmed'].sum()),
                         correlation),
 width=200, height=100, margin=(30,0,0,20))
 
@@ -932,7 +942,7 @@ layout = column(layout,div, sizing_mode='scale_both')
 
 tab11 = Panel(child=layout, title="Correlation - Tests Vs Cases")
 
-tabs = Tabs(tabs=[tab12, tab1, tab2, tab3,  tab4, tab5, tab6,  tab7, tab8, tab9, tab10, tab11], name='tabs')
+tabs = Tabs(tabs=[tab12, tab1, tab2, tab3,  tab4, tab5, tab6,  tab7, tab8, tab9, tab10, tab11])
 
 curdoc().add_root(tabs)
 
