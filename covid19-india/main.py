@@ -48,7 +48,7 @@ cases_summary['newConfirmed']=cases_summary['totalConfirmed'].groupby(cases_summ
 #Cases Trends - Statewise
 
 a = figure(plot_width=1200, plot_height=600,  sizing_mode="scale_both", name="All cases - Statewise")
-a.title.text='New Confirmed Case Trends'
+a.title.text='New Confirmed Case Trajectory'
 a.title.align='center'
 a.title.text_font_size='17px'
 a.xaxis.axis_label = 'Total Confirmed Cases'
@@ -91,8 +91,8 @@ citation = Label(x=0, y=0, x_units='screen', y_units='screen',
 
 a.add_layout(citation, 'above')
 
-citation = Label(x=518, y=-20, x_units='screen', y_units='screen',
-                 text='The data has been smoothened using Savitzky-Golay filter with a polynomial of 3rd degree.', render_mode='css', text_font_size='14px', text_align='right')
+citation = Label(x=-50, y=-15, x_units='screen', y_units='screen',
+                 text='The data has been smoothened using Savitzky-Golay filter with a polynomial of 3rd degree. This chart helps understand the trajectory of case growth for each state and understand the impact of lockdown and containment efforts by administration and frontline warriors.', render_mode='css', text_font_size='14px', text_align='left')
 
 a.add_layout(citation, 'below')
 daily_stats1 = Label(x=-300, y=550, x_units='screen', y_units='screen',
@@ -771,7 +771,7 @@ cases_tests['timestamp']=pd.to_datetime(cases_tests['timestamp'], format=r'%Y-%m
 cases_tests['timestamp']=cases_tests['timestamp'].dt.date
 
 cases_tests['timestamp']=pd.to_datetime(cases_tests['timestamp'], format=r'%Y-%m-%d')
-source=ColumnDataSource(cases_tests)
+source1=ColumnDataSource(cases_tests)
 y = figure(plot_width=1200, plot_height=700,sizing_mode="scale_both", x_axis_type='datetime')
 y.title.text='COVID19 Tests over Time'
 y.title.align='center'
@@ -802,7 +802,8 @@ y.add_tools(hover)
 y.add_tools(hover_pos)
 y.legend.location='top_left'
 
-div = Div(text="""<b>Latest Date</b>: {} <br> <br> <b>Total Tests</b>: {:,} <br><br> <b>Total Cases</b>: {:,} <br> <b>Total Deaths</b>: {:,}""".format(latest_date,cases_tests.iloc[-1]['totalSamplesTested'].astype('int64'), cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum(), cases_summary[cases_summary['day']==latest_date]['deaths'].sum()),
+div = Div(text="""<b>Latest Date</b>: {} <br> <br> <b>Total Tests</b>: {:,} <br><br> <b>Total Cases</b>: {:,} <br> <b>Total Deaths</b>: {:,} <br><br> <b>Test Positive Rate</b>: {:.2%}<br><br> This rate means that 1 confirmed positive case for every {,} tests. """.format(latest_date,cases_tests.iloc[-1]['totalSamplesTested'].astype('int64'), cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum(), cases_summary[cases_summary['day']==latest_date]['deaths'].sum(),
+             cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum()/cases_tests.iloc[-1]['totalSamplesTested'].astype('int64'), round(cases_tests.iloc[-1]['totalSamplesTested'].astype('int64')/cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum()) ),
 width=200, height=100, margin=(30,0,0,20))
 
 layout = row(y, div)
@@ -815,10 +816,14 @@ layout = column(layout,div, sizing_mode='scale_both')
 
 tab9 = Panel(child=layout, title="All India Tests over Time")
 
+
 #Testing Growth Rate
 cases_tests['timestamp']=pd.to_datetime(cases_tests['timestamp'], format=r'%Y-%m-%d')
 cases_tests['daily_tests']=cases_tests['totalSamplesTested'].diff(1)
-cases_tests['daily_confirmed']=cases_tests['totalPositiveCases'].diff(1)
+cases_copy=pd.DataFrame(cases_summary.groupby(['day'])['totalConfirmed'].sum().diff(1)).reset_index()
+cases_copy['day']=pd.to_datetime(cases_copy['day'])
+cases_tests=cases_tests.merge(cases_copy, how='left', left_on='timestamp',right_on='day')
+#cases_tests['daily_confirmed']=cases_summary.groupby(['loc','day'])['totalConfirmed'].sum().diff(1)
 
 
 z = figure(plot_width=1200, plot_height=700,sizing_mode="scale_both", x_axis_type='datetime', y_range=Range1d(start=0, end=cases_tests['totalSamplesTested'].max()))
@@ -878,18 +883,18 @@ fig.title.align='center'
 fig.title.text_font_size='17px'
 fig.xaxis.axis_label = 'Confirmed Cases'
 fig.yaxis.axis_label = 'Tests Count'
-fig.x_range=Range1d(0,cases_tests_without_na['daily_confirmed'].max() )
+fig.x_range=Range1d(0,cases_tests_without_na['totalConfirmed'].max() )
 
 
-scatterplot=fig.circle(cases_tests_without_na['daily_confirmed'],cases_tests_without_na['daily_tests'], legend_label='Daily Tests Vs Confirmed Cases')
+scatterplot=fig.circle(cases_tests_without_na['totalConfirmed'],cases_tests_without_na['daily_tests'], legend_label='Daily Tests Vs Confirmed Cases')
 
-par = np.polyfit(cases_tests_without_na['daily_confirmed'],cases_tests_without_na['daily_tests'], 1, full=True)
+par = np.polyfit(cases_tests_without_na['totalConfirmed'],cases_tests_without_na['daily_tests'], 1, full=True)
 slope=par[0][0]
 intercept=par[0][1]
-y_predicted = [slope*i + intercept  for i in cases_tests_without_na['daily_confirmed']]
+y_predicted = [slope*i + intercept  for i in cases_tests_without_na['totalConfirmed']]
 
-LinearRegression = fig.line(cases_tests_without_na['daily_confirmed'],y_predicted,color='red',legend_label='y='+str(round(slope,2))+'x+'+str(round(intercept,2)))
-correlation=cases_tests_without_na[['daily_confirmed','daily_tests']].corr('pearson')['daily_tests'][0]
+LinearRegression = fig.line(cases_tests_without_na['totalConfirmed'],y_predicted,color='red',legend_label='y='+str(round(slope,2))+'x+'+str(round(intercept,2)))
+correlation=cases_tests_without_na[['totalConfirmed','daily_tests']].corr('pearson')['daily_tests'][0]
 
 hover = HoverTool(line_policy='next', renderers=[scatterplot])
 hover.tooltips = [('Confirmed Cases', '@x'),
@@ -927,8 +932,9 @@ layout = column(layout,div, sizing_mode='scale_both')
 
 tab11 = Panel(child=layout, title="Correlation - Tests Vs Cases")
 
-tabs = Tabs(tabs=[tab12, tab1, tab2, tab3,  tab4, tab5, tab6,  tab7, tab8, tab9, tab10, tab11])
-bokeh_doc.add_root(tabs)
+tabs = Tabs(tabs=[tab12, tab1, tab2, tab3,  tab4, tab5, tab6,  tab7, tab8, tab9, tab10, tab11], name='tabs')
+
+curdoc().add_root(tabs)
 
 #output_file('Statewise Cases and Deaths-Bokeh.html')
 script, div = components(tabs, CDN)
