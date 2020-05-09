@@ -64,7 +64,7 @@ for name, color in zip(cases_summary['loc'].unique(), itertools.cycle(Dark2_8)):
             return length // 2
         else:
             return (length // 2) + 1
-    if (length>3):
+    if (length>=7):
 
         yhat = savgol_filter(cases_summary[cases_summary['loc'] == name]['newConfirmed'],window_size(length), 3)
 
