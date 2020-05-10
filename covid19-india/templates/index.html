@@ -1,9 +1,21 @@
 {% extends base %}
+
 <!--<!DOCTYPE html> -->
 <html lang="en">
 {% block head %}
 <head>
+    
      {% block preamble %}
+        <style type="text/css">
+            .se-pre-con{
+                         width:100%;
+                        height:100%;
+                        position:fixed;
+                        z-index:9999;
+                        background:url("https://smallenvelop.com/wp-content/uploads/2014/08/Preloader_11.gif") no-repeat center center rgba(0,0,0,0)
+                        }
+        </style>
+
         <meta charset="utf-8">
        {% block title %} <title>{{"COVID19 Analysis India"}}</title> {% endblock %}
         <meta name="HandheldFriendly" content="True">
@@ -23,6 +35,13 @@
             })(window,document,'script','dataLayer','GTM-P5FM6PM');
         </script>
 
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.js"></script>
+
+    	<script> $(window).load(function() {
+		// Animate loader off screen
+		$(".se-pre-con").fadeOut("slow");;
+       	}); </script>
 
         <script type="text/javascript" src="static/js/bokeh.min.js?v=57d29d5936e494351385d736f792154c"></script>
         <script type="text/javascript" src="static/js/bokeh-widgets.min.js?v=fdb1f42cceaade9062de57963cac654c"></script>
@@ -41,6 +60,7 @@
         <meta name="twitter:title" content="Analyse and Compare COVID19 spread between Indian states" />
         <meta name="twitter:site" content="@akash2692" />
 
+
 </head>
 {% endblock %}
 
@@ -48,6 +68,9 @@
     {% block contents %}
         <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P5FM6PM"
             height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <div class = 'se-pre-con'> </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.js"></script>
      <div class="bokeh-tabs">{{ embed(roots.tabs)}}</div>
      {% endblock %}
 </body>
