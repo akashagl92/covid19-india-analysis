@@ -45,6 +45,20 @@ highest_state=cases_summary[cases_summary['totalConfirmed']==cases_summary['tota
 
 cases_summary['newConfirmed']=cases_summary['totalConfirmed'].groupby(cases_summary['loc']).diff(1)
 
+#Cumulative Days count since 1st reported case for each state
+cases_summary['day_count']=(cases_summary['day'].groupby(cases_summary['loc']).cumcount())+1
+
+#Cumulative Days count since 1st reported case
+#cases_summary['day'] = pd.to_datetime(cases_summary['day'])
+#
+#cases_summary['cum_day_count']=(cases_summary['day']-cases_summary['day'].min())+timedelta(days=1)
+#
+#cases_summary['cum_day_count']= cases_summary['cum_day_count'].astype('str').str.replace(' days 00:00:00.000000000', '')
+#
+#cases_summary['cum_day_count'] = pd.to_numeric(cases_summary['cum_day_count'])
+
+
+
 #Cases Trends - Statewise
 
 newConfirmed=cases_summary['newConfirmed'].groupby(cases_summary['day']).sum()
@@ -54,7 +68,6 @@ cases=pd.DataFrame({'newConfirmed': newConfirmed, 'totalConfirmed':cases_summary
 
 cases['day'] = cases['day'].astype('str')
 
-#All India Smoothing DataFrame creation
 
 length = len(cases)
 
@@ -174,7 +187,6 @@ layout = column(select,fig1)
 
 tab12 = Panel(child=layout, title="Cases Trajectory")
 
-
 #Statewise Cases Over Time
 legend_it=[]
 
@@ -202,7 +214,7 @@ p.add_layout(legend1,'right')
 p.add_layout(legend2,'right')
 
 cases_summary['day']=cases_summary['day'].astype('str')
-source=ColumnDataSource(cases_summary)
+source1=ColumnDataSource(cases_summary)
 
 hover = HoverTool(line_policy='next')
 hover.tooltips = [('Date', '@x{%F}'),
@@ -294,49 +306,6 @@ fig = column(q,div, sizing_mode='scale_both')
 
 tab2 = Panel(child=fig, title="All Deaths - Statewise")
 
-#statwise death and total case over time
-
-#r = figure(plot_width=1200, plot_height=700, x_axis_type="datetime",  sizing_mode="scale_both")
-#r.title.text='statewise deaths over time'
-#r.title.align='center'
-#r.title.text_font_size='17px'
-#r.xaxis.axis_label = 'date'
-#r.yaxis.axis_label = 'cases/deaths'
-#
-#
-#for name, color in zip(cases_summary['loc'].unique(), itertools.cycle(Dark2_8)):
-#    cases_summary['day'] = pd.to_datetime(cases_summary['day'])
-#    renderer=r.line(cases_summary[cases_summary['loc']==name]['day'], cases_summary[cases_summary['loc']==name]['totalconfirmed'], line_width=2, color=color, alpha=1,
-#          muted_alpha=0.2, line_color=color)
-#    if renderer.on_change('visible'):
-#        renderer_deaths.visible = true
-#        renderer_deaths=r.line(cases_summary[cases_summary['loc']==name]['day'], cases_summary[cases_summary['loc']==name]['deaths'], line_width=2, color=color, alpha=1,
-#          muted_alpha=0.2, legend_label='deceased', line_color=color)
-#
-#    else:
-#        renderer_deaths.visible=false
-#
-#    renderer.visible = false
-#    renderer_deaths.visible = false
-#
-#    legend_it.append((name, [renderer]))
-#
-#legend1=legend(items=legend_it[0:16], location=(10,110), click_policy='hide', title="toggle states to activate", title_text_font_style = "bold")
-#legend2=legend(items=legend_it[17:33], location=(10,110), click_policy='hide', title="toggle states to activate", title_text_font_style = "bold")
-#
-#r.add_layout(legend1,'right')
-#r.add_layout(legend2,'right')
-#
-#cases_summary['day']=cases_summary['day'].astype('str')
-#
-#hover = hovertool(line_policy='next')
-#hover.tooltips = [('date', '@x{%f}'),
-#                  ('deaths', '@y{0000}')  # @$name gives the value corresponding to the legend
-#]
-#hover.formatters = {'@x': 'datetime'}
-#r.add_tools(hover)
-#tab3 = panel(child=r, title="cases/deaths")
-
 
 #statewise case-to-death ratio over time
 
@@ -413,7 +382,7 @@ cases_summary['case-death-ratio']=cases_summary['case-death-ratio'].replace(np.n
 cases_summary_latest_date=cases_summary[cases_summary['day']==latest_date][['loc','case-death-ratio', 'totalConfirmed', 'deaths', 'discharged', 'fatality_rate']].reset_index()
 highest_case_death_ratio_state=cases_summary_latest_date[cases_summary_latest_date['case-death-ratio']==cases_summary_latest_date['case-death-ratio'].max()]['loc'].tolist()[0]
 highest_fatality_rate_state=cases_summary_latest_date[cases_summary_latest_date['fatality_rate']==cases_summary_latest_date['fatality_rate'].max()]['loc'].tolist()[0]
-source=ColumnDataSource(cases_summary_latest_date)
+source1=ColumnDataSource(cases_summary_latest_date)
 
 t = figure(x_range=cases_summary_latest_date['loc'],plot_width=1200, plot_height=700,  sizing_mode="scale_both")
 t.title.text='Statewise Case-to-Death Ratio'
@@ -717,7 +686,7 @@ w.add_layout(legend1,'right')
 w.add_layout(legend2,'right')
 
 cases_summary['day']=cases_summary['day'].astype('str')
-source=ColumnDataSource(cases_summary)
+source1=ColumnDataSource(cases_summary)
 
 hover = HoverTool(line_policy='next')
 hover.tooltips = [('Date', '@x{%F}'),
@@ -787,7 +756,7 @@ x.add_layout(legend1,'right')
 x.add_layout(legend2,'right')
 
 cases_summary['day']=cases_summary['day'].astype('str')
-source=ColumnDataSource(cases_summary)
+source1=ColumnDataSource(cases_summary)
 
 hover = HoverTool(line_policy='next')
 hover.tooltips = [('Date', '@x{%F}'),
