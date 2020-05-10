@@ -4,16 +4,22 @@
 <html lang="en">
 {% block head %}
 <head>
-    
+
      {% block preamble %}
         <style type="text/css">
             .se-pre-con{
-                         width:100%;
+                        width:100%;
                         height:100%;
                         position:fixed;
                         z-index:9999;
-                        background:url("https://smallenvelop.com/wp-content/uploads/2014/08/Preloader_11.gif") no-repeat center center rgba(0,0,0,0)
+                        background:no-repeat center center rgba(0,0,0,0)
                         }
+            .se-pre-con img{
+                        position: relative;
+                        left: 50%;
+                        top: 50%;
+                        }
+
         </style>
 
         <meta charset="utf-8">
@@ -68,9 +74,7 @@
     {% block contents %}
         <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P5FM6PM"
             height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-    <div class = 'se-pre-con'> </div>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.js"></script>
+    <div class = 'se-pre-con'><img src="/staging/static/Preloader_6.gif"/></div>
      <div class="bokeh-tabs">{{ embed(roots.tabs)}}</div>
      {% endblock %}
 </body>
