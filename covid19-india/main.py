@@ -12,7 +12,7 @@ import csv
 from pandas.io.json import json_normalize
 import math
 from bokeh.io import show, output_file
-from bokeh.models import ColumnDataSource, Legend, LegendItem, Scatter, Label
+from bokeh.models import ColumnDataSource, Legend, LegendItem, Scatter, Label, GroupFilter, CDSView
 from bokeh.plotting import figure, output_file, show, output_notebook, curdoc
 from bokeh.models.tools import HoverTool
 from bokeh.core.properties import value
@@ -20,7 +20,7 @@ from bokeh.palettes import Spectral11, Dark2_8
 import itertools
 from bokeh.layouts import row, column
 from bokeh.models.annotations import Title
-from bokeh.models import Panel, Tabs
+from bokeh.models import Panel, Tabs, Select
 from datetime import timedelta
 from bokeh.models import LinearAxis, Range1d
 from bokeh.models import Div
