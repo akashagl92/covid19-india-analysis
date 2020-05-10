@@ -47,71 +47,133 @@ cases_summary['newConfirmed']=cases_summary['totalConfirmed'].groupby(cases_summ
 
 #Cases Trends - Statewise
 
-a = figure(plot_width=1200, plot_height=600,  sizing_mode="scale_both", name="All cases - Statewise")
-a.title.text='New Confirmed Case Trajectory'
-a.title.align='center'
-a.title.text_font_size='17px'
+newConfirmed=cases_summary['newConfirmed'].groupby(cases_summary['day']).sum()
+
+cases=pd.DataFrame({'newConfirmed': newConfirmed, 'totalConfirmed':cases_summary['totalConfirmed'].groupby(cases_summary['day']).sum()})\
+   .reset_index()
+
+cases['day'] = cases['day'].astype('str')
+
+#All India Smoothing DataFrame creation
+
+length = len(cases)
+
+def window_size(length):
+    if ((length // 2) % 2 == 1):
+        return length // 2
+    else:
+        return (length // 2) + 1
+
+cases['yhat']=savgol_filter(cases['newConfirmed'],window_size(length), 3)
+
+source=ColumnDataSource(cases)
+
+#Statewise Smoothing to view cases trajectory
+newConfirmed=cases_summary.groupby(['loc','day'])['newConfirmed'].sum()
+cases_states=pd.DataFrame({'newConfirmed': newConfirmed, 'totalConfirmed':cases_summary.groupby(['loc','day'])['totalConfirmed'].sum()})\
+    .reset_index()
+
+cases_new_final= pd.DataFrame()
+for i in cases_states['loc'].unique():
+    if len(cases_states[cases_states['loc']==i])<=7:
+        continue
+    else:
+        def window_size(length):
+            if ((length // 2) % 2 == 1):
+                return length // 2
+            else:
+                return (length // 2) + 1
+        cases_new=DataFrame({'loc':i,'yhat':savgol_filter(cases_states[cases_states['loc']==i]['newConfirmed'], window_size(len(cases_states[cases_states['loc']==i])), 3), 'day': cases_states[cases_states['loc']==i]['day'], 'newConfirmed': cases_states[cases_states['loc']==i]['newConfirmed'], 'totalConfirmed': cases_states[cases_states['loc']==i]['totalConfirmed']})
+        cases_new_final=cases_new_final.append(cases_new)
+
+cases_new_final['day'] = cases_new_final['day'].astype('str')
+
+a = figure(plot_width=1200, plot_height=600, sizing_mode="scale_both", name="All cases - Statewise")
+a.title.text = 'New Confirmed Case Trajectory'
+a.title.align = 'center'
+a.title.text_font_size = '17px'
 a.xaxis.axis_label = 'Total Confirmed Cases'
 a.yaxis.axis_label = 'New Confirmed Cases'
 
 legend_it=[]
+source=ColumnDataSource(data=cases_new_final)
 
-for name, color in zip(cases_summary['loc'].unique(), itertools.cycle(Dark2_8)):
+for i, color in zip(range(len(cases_new_final['loc'].unique())),itertools.cycle(Dark2_8)):
+    view=CDSView(source=source,
+    filters=[GroupFilter(column_name='loc', group=cases_new_final['loc'].unique()[i])])
 
-    length=len(cases_summary[cases_summary['loc'] == name]['newConfirmed'])
-    def window_size(length):
-        if ((length // 2) % 2 == 1):
-            return length // 2
-        else:
-            return (length // 2) + 1
-    if (length>=7):
+    renderer_yhat = a.line('totalConfirmed',
+                       'yhat', line_width=2,  alpha=1,
+                       muted_alpha=0.1, source=source, view=view, color=color)
 
-        yhat = savgol_filter(cases_summary[cases_summary['loc'] == name]['newConfirmed'],window_size(length), 3)
-
-        renderer_yhat = a.line(cases_summary[cases_summary['loc'] == name]['totalConfirmed'],
-                      yhat, line_width=2, color=color, alpha=1,
-                      muted_alpha=0.1)
-
-        renderer_yhat_bold = a.line(cases_summary[cases_summary['loc'] == name]['totalConfirmed'],
-                           yhat, line_width=2, color=color, alpha=1,
-                           muted_alpha=0.15)
+    renderer_yhat_bold = a.line('totalConfirmed',
+                       'yhat', line_width=2,  alpha=1,
+                       muted_alpha=0.1, source=source, view=view, color=color)
 
     renderer_yhat.visible = False
     renderer_yhat_bold.muted = True
 
-    legend_it.append((name, [renderer_yhat]))
+    legend_it.append((cases_new_final['loc'].unique()[i], [renderer_yhat]))
 
 legend1=Legend(items=legend_it[0:16], location=(10,21), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
 legend2=Legend(items=legend_it[16:33], location=(10,0), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
+
 a.add_layout(legend1,'right')
 a.add_layout(legend2,'right')
 
 citation = Label(x=0, y=0, x_units='screen', y_units='screen',
-                 text='Last Updated : {}'.format(latest_date), render_mode='css', text_font_size='12px')
+             text='Last Updated : {}'.format(latest_date), render_mode='css', text_font_size='12px')
 
 a.add_layout(citation, 'above')
 
+hover = HoverTool(line_policy='next')
+hover.tooltips = [('Date', '@day'),
+          ('Total Confirmed', '@totalConfirmed{0000}'),
+          ('New Confirmed', '@newConfirmed{0000}'),
+          ('State', '@loc')
+            ]
+a.add_tools(hover)
+
 citation = Label(x=-50, y=-15, x_units='screen', y_units='screen',
-                 text='The data has been smoothened using Savitzky-Golay filter with a polynomial of 3rd degree. This chart helps understand the trajectory of case growth for each state and understand the impact of lockdown and containment efforts by administration and frontline warriors.', render_mode='css', text_font_size='14px', text_align='left')
+             text='The data has been smoothened using Savitzky-Golay filter with a polynomial of 3rd degree. This chart helps understand the trajectory of case growth for each state and understand the impact of lockdown and containment efforts by administration and frontline warriors.', render_mode='css', text_font_size='14px', text_align='left')
 
 a.add_layout(citation, 'below')
-daily_stats1 = Label(x=-300, y=550, x_units='screen', y_units='screen',
-                 text='Total Cases : {:,}'.format(cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum()), render_mode='css', text_font_size='14px', text_align='right')
-daily_stats2 = Label(x=-321, y=520, x_units='screen', y_units='screen',
-                 text='Total Deaths : {:,}'.format(cases_summary[cases_summary['day']==latest_date]['deaths'].sum()), render_mode='css', text_font_size='14px', text_align='right')
-daily_stats3 = Label(x=-305, y=490, x_units='screen', y_units='screen',
-                 text='Total Discharged : {:,}'.format(cases_summary[cases_summary['day']==latest_date]['discharged'].sum()), render_mode='css', text_font_size='14px', text_align='right')
 
-a.add_layout(daily_stats1, 'right')
-a.add_layout(daily_stats2, 'right')
-a.add_layout(daily_stats3, 'right')
+
+daily_insight = Div(text="""<br><br>New Confirmed cases has grown at the fastest rate in Tamil Nadu.<br><br>The number of cases has increased at the fastest rate from April 26th with 1821 Total Confirmed cases at the time.<br>""",
+                      width=150, margin=(0,0,0,20))
+
+daily_stats = Div(text="""<b> Total Cases</b> : {:,}<br>                                                                     
+                          <b> Total Deaths</b> : {:,}<br>                                                                    
+                          <b> Total Recovered</b> : {:,}"""
+                        .format(cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum(),
+                                cases_summary[cases_summary['day']==latest_date]['deaths'].sum(),
+                                cases_summary[cases_summary['day']==latest_date]['discharged'].sum()), margin=(50,0,0,20))
+
+a= row(a,column(daily_stats, daily_insight))
 
 div = Div(text="""<br><br><b>Source:</b>
                 COVID-19 REST API for India: <a href='https://api.rootnet.in/covid19-in/stats/history' target="_blank"> The Ministry of Health and Family Welfare</a> """,
-width=300, height=50, align='start')
+    width=300, height=50, align='start')
 
 fig1 = column(a,div, sizing_mode='scale_both')
-tab12 = Panel(child=fig1, title="Case Trends - Statewise")
+
+
+def update(attr,old,new):
+    if(select.value=='All India'):
+        newSource = ColumnDataSource(cases)
+    if(select.value=='All States'):
+        newSource = ColumnDataSource(cases_new_final)
+    source.data = dict(newSource.data)
+
+
+select=Select(title="Select:", value="All States", options=['All India', 'All States'], align='end', width=150, margin=(20,0,0,20))
+select.on_change('value', update)
+
+layout = column(select,fig1)
+
+tab12 = Panel(child=layout, title="Cases Trajectory")
+
 
 #Statewise Cases Over Time
 legend_it=[]
