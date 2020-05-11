@@ -12,7 +12,7 @@ import csv
 from pandas.io.json import json_normalize
 import math
 from bokeh.io import show, output_file
-from bokeh.models import ColumnDataSource, Legend, LegendItem, Scatter, Label, GroupFilter, CDSView
+from bokeh.models import ColumnDataSource, Legend, LegendItem, Scatter, Label, GroupFilter, CDSView, DataTable, TableColumn
 from bokeh.plotting import figure, output_file, show, output_notebook, curdoc
 from bokeh.models.tools import HoverTool
 from bokeh.core.properties import value
@@ -49,14 +49,18 @@ cases_summary['newConfirmed']=cases_summary['totalConfirmed'].groupby(cases_summ
 cases_summary['day_count']=(cases_summary['day'].groupby(cases_summary['loc']).cumcount())+1
 
 #Cumulative Days count since 1st reported case
-#cases_summary['day'] = pd.to_datetime(cases_summary['day'])
-#
-#cases_summary['cum_day_count']=(cases_summary['day']-cases_summary['day'].min())+timedelta(days=1)
-#
-#cases_summary['cum_day_count']= cases_summary['cum_day_count'].astype('str').str.replace(' days 00:00:00.000000000', '')
-#
-#cases_summary['cum_day_count'] = pd.to_numeric(cases_summary['cum_day_count'])
+cases_summary['day'] = pd.to_datetime(cases_summary['day'])
 
+cases_summary['cum_day_count']=(cases_summary['day']-cases_summary['day'].min())+timedelta(days=1)
+
+cases_summary['cum_day_count']= cases_summary['cum_day_count'].astype('str').str.replace(' days 00:00:00.000000000', '')
+
+cases_summary['cum_day_count'] = pd.to_numeric(cases_summary['cum_day_count'])
+
+case_growth_latest=pd.DataFrame(cases_summary.groupby('loc')['growth-rate'].last().reset_index())
+case_growth_positive=case_growth_latest.sort_values(by='growth-rate',ascending=False).head(6)
+cases_zero_growth=case_growth_latest.loc[case_growth_latest['growth-rate']==0]
+case_growth_negative=case_growth_latest[-(case_growth_latest['growth-rate']==0)].sort_values(by='growth-rate',ascending=True).head(6)
 
 
 #Cases Trends - Statewise
@@ -184,6 +188,27 @@ select=Select(title="Select:", value="All States", options=['All India', 'All St
 select.on_change('value', update)
 
 layout = column(select,fig1)
+
+#Tables for Last 10 Days Cases Growth
+
+source1=ColumnDataSource(data=case_growth_positive)
+source2=ColumnDataSource(data=case_growth_negative)
+source3=ColumnDataSource(data=cases_zero_growth)
+
+columns = [
+    TableColumn(field="loc", title="State"),
+    TableColumn(field="growth-rate", title="New Cases (Last 10 days)")
+]
+
+data_table_growth = DataTable(source=source1, columns=columns, width=400, height=280, index_position=None, margin=(20,0,0,20),align='center')
+data_table_improv = DataTable(source=source2, columns=columns, width=400, height=280, index_position=None, margin=(20,0,0,20),align='center')
+data_table_stable = DataTable(source=source3, columns=columns, width=400, height=280, index_position=None, margin=(20,0,0,20),align='center')
+
+div = Div(text="""<br>
+                <b>Below are the top states that have shown the largest growth, least growth and no growth in new cases in last 10 Days.</b>""",
+    width=800, height=50, align='center')
+
+layout=column(layout,column(div, row(data_table_growth,data_table_improv,data_table_stable)))
 
 tab12 = Panel(child=layout, title="Cases Trajectory")
 
