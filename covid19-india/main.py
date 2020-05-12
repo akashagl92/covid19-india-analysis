@@ -1000,3 +1000,4 @@ tab11 = Panel(child=layout, title="Correlation - Tests Vs Cases")
 tabs = Tabs(tabs=[tab12, tab1, tab2, tab3,  tab4, tab5, tab6,  tab7, tab8, tab9, tab10, tab11], name='tabs')
 
 curdoc().add_root(tabs)
+curdoc().title="COVID19 Analysis India"
