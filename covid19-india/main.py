@@ -828,18 +828,33 @@ cases_tests['timestamp']=pd.to_datetime(cases_tests['timestamp'], format=r'%Y-%m
 cases_tests['timestamp']=cases_tests['timestamp'].dt.date
 
 cases_tests['timestamp']=pd.to_datetime(cases_tests['timestamp'], format=r'%Y-%m-%d')
-source1=ColumnDataSource(cases_tests)
-y = figure(plot_width=1200, plot_height=700,sizing_mode="scale_both", x_axis_type='datetime')
-y.title.text='COVID19 Tests over Time'
-y.title.align='center'
-y.title.text_font_size='17px'
-y.xaxis.axis_label = 'Date'
-y.yaxis.axis_label = 'Tests Count'
 
-sample_test=y.vbar(x=cases_tests['timestamp'], bottom=cases_tests['totalSamplesTested'], width=timedelta(days=0.5), color='#5e4fa2', alpha=1,
+cases_tests['daily_tests']=cases_tests['totalSamplesTested'].diff(1)
+cases_copy=pd.DataFrame(cases_summary.groupby(['day'])['totalConfirmed'].sum().diff(1)).reset_index()
+cases_copy['day']=pd.to_datetime(cases_copy['day'])
+
+cases_tests=cases_tests.merge(cases_copy, how='left', left_on='timestamp',right_on='day')
+
+#Testing Growth Rate
+
+
+z = figure(plot_width=1200, plot_height=700,sizing_mode="scale_both", x_axis_type='datetime', y_range=Range1d(start=0, end=cases_tests['daily_tests'].max()))
+z.title.text='COVID19 Tests over Time'
+z.title.align='center'
+z.title.text_font_size='17px'
+z.xaxis.axis_label = 'Date'
+z.yaxis.axis_label = 'Tests Count'
+#z.extra_y_ranges = {'tests_growth_rate': Range1d(start=cases_tests['daily_tests'].pct_change().min(), end=cases_tests['daily_tests'].pct_change().max())}
+
+#z.add_layout(LinearAxis(y_range_name='tests_growth_rate'), 'right')
+
+sample_test=z.vbar(x=cases_tests['timestamp'], bottom=cases_tests['daily_tests'], width=timedelta(days=0.5), color='#5e4fa2', alpha=1,
           legend_label="Samples Tested")
-positive_test=y.vbar(x=cases_tests['timestamp'], top=cases_summary.groupby(['day'])['totalConfirmed'].sum(), width=timedelta(days=0.5),  color='#3288bd', alpha=1,
+positive_test=z.vbar(x=cases_tests['timestamp'], top=cases_summary.groupby(['day'])['newConfirmed'].sum(), width=timedelta(days=0.5),  color='#3288bd', alpha=1,
           legend_label="Tested Positive")
+#sample_test_growth=z.line(cases_tests['timestamp'], cases_tests['daily_tests'].pct_change() , color='#e7298a', alpha=1, y_range_name='tests_growth_rate', legend_label='Tests Growth Rate', line_width = 2)
+
+
 
 #cases_summary['day']=cases_summary['day'].astype('str')
 
@@ -855,67 +870,19 @@ hover_pos.tooltips = [('Date', '@x{%F}'),
 ]
 hover_pos.formatters = {'@x': 'datetime'}
 
-y.add_tools(hover)
-y.add_tools(hover_pos)
-y.legend.location='top_left'
-
-div=Div(text="""<b>Latest Date</b>: {} <br> <br> <b>Total Tests</b>: {:,} <br><br> <b>Total Cases</b>: {:,} <br> <b>Total Deaths</b>: {:,} <br><br> <b>Test Positive Rate</b>: {:.2%}<br><br> This rate means that 1 confirmed positive case for every {:,} tests. """
-    .format(latest_date,cases_tests.iloc[-1]['totalSamplesTested'].astype('int64'),
-            cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum(),
-            cases_summary[cases_summary['day']==latest_date]['deaths'].sum(),
-             cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum()/cases_tests.iloc[-1]['totalSamplesTested'].astype('int64'),
-            round(cases_tests.iloc[-1]['totalSamplesTested'].astype('int64')/cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum()) ),
-width=200, height=100, margin=(30,0,0,20))
-
-layout = row(y, div)
-
-div = Div(text="""<b>Source:</b>
-                COVID-19 REST API for India: <a href='https://api.rootnet.in/covid19-in/stats/testing/raw' target="_blank"> The Ministry of Health and Family Welfare</a> """,
-width=300, height=50, align='start')
-
-layout = column(layout,div, sizing_mode='scale_both')
-
-tab9 = Panel(child=layout, title="All India Tests over Time")
-
-#Testing Growth Rate
-cases_tests['timestamp']=pd.to_datetime(cases_tests['timestamp'], format=r'%Y-%m-%d')
-cases_tests['daily_tests']=cases_tests['totalSamplesTested'].diff(1)
-cases_copy=pd.DataFrame(cases_summary.groupby(['day'])['totalConfirmed'].sum().diff(1)).reset_index()
-cases_copy['day']=pd.to_datetime(cases_copy['day'])
-cases_tests=cases_tests.merge(cases_copy, how='left', left_on='timestamp',right_on='day')
-
-
-z = figure(plot_width=1200, plot_height=700,sizing_mode="scale_both", x_axis_type='datetime', y_range=Range1d(start=0, end=cases_tests['totalSamplesTested'].max()))
-z.title.text='COVID19 Tests Growth Rate over Time'
-z.title.align='center'
-z.title.text_font_size='17px'
-z.xaxis.axis_label = 'Date'
-z.yaxis.axis_label = 'Tests Count'
-
-z.extra_y_ranges = {'tests_growth_rate': Range1d(start=cases_tests['totalSamplesTested'].pct_change().min(), end=cases_tests['totalSamplesTested'].pct_change().max())}
-z.add_layout(LinearAxis(y_range_name='tests_growth_rate'), 'right')
-
-sample_test_growth=z.vbar(x=cases_tests['timestamp'],top=cases_tests['totalSamplesTested'].pct_change() , width=timedelta(days=0.5), color='#5e4fa2', alpha=1, y_range_name='tests_growth_rate', legend_label='Tests Growth Rate')
-sample_test=z.line(cases_tests['timestamp'], cases_tests['daily_tests'], line_width=2, color='#d53e4f', alpha=1, legend_label="Daily Tests Count")
-
-#cases_summary['day']=cases_summary['day'].astype('str')
-
-hover = HoverTool(line_policy='next', renderers=[sample_test_growth])
-hover.tooltips = [('Date', '@x{%F}'),
-                  ('Tests Growth Rate', '@top{0.:00%}')  # @$name gives the value corresponding to the legend
-]
-hover.formatters = {'@x': 'datetime'}
-
-hover_growth = HoverTool(line_policy='next', renderers=[sample_test])
-hover_growth.tooltips = [('Date', '@x{%F}'),
-                  ('Tests Count', '@y')  # @$name gives the value corresponding to the legend
-]
-hover_growth.formatters = {'@x': 'datetime'}
+#hover_growth = HoverTool(line_policy='next', renderers=[sample_test_growth])
+#hover_growth.tooltips = [('Date', '@x{%F}'),
+#                  ('Tests Growth Rate', '@y{0.:00%}')  # @$name gives the value corresponding to the legend
+#]
+#hover_growth.formatters = {'@x': 'datetime'}
 
 z.add_tools(hover)
-z.add_tools(hover_growth)
+z.add_tools(hover_pos)
+#z.add_tools(hover_growth)
+
 z.legend.click_policy='hide'
 z.legend.title='Click to Switch Legend ON/OFF'
+z.legend.location='top_left'
 
 div=Div(text="""<b>Latest Date</b>: {} <br> <br> <b>Total Tests</b>: {:,} <br><br> <b>Total Cases</b>: {:,} <br> <b>Total Deaths</b>: {:,} <br><br> <b>Test Positive Rate</b>: {:.2%}<br><br> This rate means that 1 confirmed positive case for every {:,} tests. """.format(latest_date,cases_tests.iloc[-1]['totalSamplesTested'].astype('int64'), cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum(), cases_summary[cases_summary['day']==latest_date]['deaths'].sum(),
              cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum()/cases_tests.iloc[-1]['totalSamplesTested'].astype('int64'), round(cases_tests.iloc[-1]['totalSamplesTested'].astype('int64')/cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum()) ),
@@ -929,11 +896,11 @@ width=300, height=50, align='start')
 
 layout = column(layout,div, sizing_mode='scale_both')
 
-tab10 = Panel(child=layout, title="All India Tests Growth Rate")
+tab10 = Panel(child=layout, title="All India Tests")
 
 
 #Correlation between Tests Count and Confirmed Cases
-
+cases_tests=cases_tests.drop(labels=['totalIndividualsTested','totalPositiveCases'], axis=1)
 cases_tests_without_na=cases_tests.dropna(axis=0, how='any')
 
 fig=figure(plot_width=1200, plot_height=700,sizing_mode="scale_both")
@@ -999,7 +966,7 @@ layout = column(layout,div, sizing_mode='scale_both')
 
 tab11 = Panel(child=layout, title="Correlation - Tests Vs Cases")
 
-tabs = Tabs(tabs=[tab12, tab1, tab2, tab3,  tab4, tab5, tab6,  tab7, tab8, tab9, tab10, tab11], name='tabs')
+tabs = Tabs(tabs=[tab12, tab1, tab2, tab3,  tab4, tab5, tab6,  tab7, tab8, tab10, tab11], name='tabs')
 
 curdoc().add_root(tabs)
 curdoc().title="COVID19 Analysis India"
