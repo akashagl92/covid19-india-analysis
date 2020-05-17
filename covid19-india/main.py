@@ -677,8 +677,17 @@ tab6 = Panel(child=layout, title="Growth Rate over Time" )
 cases_summary = requests.get('https://api.rootnet.in/covid19-in/stats/history')
 json_data = cases_summary.json()
 cases_summary=pd.json_normalize(json_data['data'], record_path='regional', meta='day')
-cases_summary['loc']=np.where(cases_summary['loc']=='Nagaland#', 'Nagaland', cases_summary['loc'])
 
+cases_summary['loc']=np.where(cases_summary['loc']=='Nagaland#', 'Nagaland', cases_summary['loc'])
+cases_summary['loc']=np.where(cases_summary['loc']=='Madhya Pradesh#', 'Madhya Pradesh', cases_summary['loc'])
+cases_summary['loc']=np.where(cases_summary['loc']=='Jharkhand#', 'Jharkhand', cases_summary['loc'])
+
+cases_summary = cases_summary.dropna(axis=0)
+
+latest_date=cases_summary['day'].max()
+highest_state=cases_summary[cases_summary['totalConfirmed']==cases_summary['totalConfirmed'].max()]['loc'].tolist()[0]
+
+cases_summary['newConfirmed']=cases_summary['totalConfirmed'].groupby(cases_summary['loc']).diff(1)
 legend_it=[]
 
 w = figure(plot_width=1200, plot_height=600, x_axis_type="datetime",  sizing_mode="scale_both")
