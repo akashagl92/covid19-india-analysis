@@ -40,6 +40,8 @@ cases_summary['loc']=np.where(cases_summary['loc']=='Nagaland#', 'Nagaland', cas
 cases_summary['loc']=np.where(cases_summary['loc']=='Madhya Pradesh#', 'Madhya Pradesh', cases_summary['loc'])
 cases_summary['loc']=np.where(cases_summary['loc']=='Jharkhand#', 'Jharkhand', cases_summary['loc'])
 
+cases_summary = cases_summary.dropna(axis=0)
+
 latest_date=cases_summary['day'].max()
 highest_state=cases_summary[cases_summary['totalConfirmed']==cases_summary['totalConfirmed'].max()]['loc'].tolist()[0]
 
