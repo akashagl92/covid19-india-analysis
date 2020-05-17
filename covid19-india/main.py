@@ -938,7 +938,7 @@ hover.tooltips = [('Confirmed Cases', '@x'),
 
 hover_line = HoverTool(line_policy='next', renderers=[LinearRegression])
 hover_line.tooltips = [('Estimated Confirmed Cases at given rate', '@x'),
-                  ('Tests Count ', '@y')  # @$name gives the value corresponding to the legend
+                  ('Tests Count ', '@y{,}')  # @$name gives the value corresponding to the legend
 ]
 fig.add_tools(hover)
 fig.add_tools(hover_line)
