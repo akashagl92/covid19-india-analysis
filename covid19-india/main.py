@@ -847,7 +847,7 @@ cases_tests=cases_tests.merge(cases_copy, how='left', left_on='timestamp',right_
 #Testing Growth Rate
 
 
-z = figure(plot_width=1200, plot_height=700,sizing_mode="scale_both", x_axis_type='datetime', y_range=Range1d(start=0, end=cases_tests['daily_tests'].max()))
+z = figure(plot_width=1200, plot_height=700,sizing_mode="scale_both", x_axis_type='datetime')
 z.title.text='COVID19 Tests over Time'
 z.title.align='center'
 z.title.text_font_size='17px'
