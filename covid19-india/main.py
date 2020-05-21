@@ -249,9 +249,9 @@ hover.tooltips = [('Date', '@x{%F}'),
 hover.formatters = {'@x': 'datetime'}
 p.add_tools(hover)
 
-daily_stats1 = Label(x=-300, y=550, x_units='screen', y_units='screen',
+daily_stats1 = Label(x=-292, y=550, x_units='screen', y_units='screen',
                  text='Total Cases : {:,}'.format(cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum()), render_mode='css', text_font_size='14px', text_align='right')
-daily_stats2 = Label(x=-321, y=520, x_units='screen', y_units='screen',
+daily_stats2 = Label(x=-320, y=520, x_units='screen', y_units='screen',
                  text='Total Deaths : {:,}'.format(cases_summary[cases_summary['day']==latest_date]['deaths'].sum()), render_mode='css', text_font_size='14px', text_align='right')
 daily_stats3 = Label(x=-305, y=490, x_units='screen', y_units='screen',
                  text='Total Discharged : {:,}'.format(cases_summary[cases_summary['day']==latest_date]['discharged'].sum()), render_mode='css', text_font_size='14px', text_align='right')
@@ -307,9 +307,9 @@ hover.formatters = {'@x': 'datetime'}
 q.add_tools(hover)
 
 
-daily_stats1 = Label(x=-300, y=550, x_units='screen', y_units='screen',
+daily_stats1 = Label(x=-292, y=550, x_units='screen', y_units='screen',
                  text='Total Cases : {:,}'.format(cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum()), render_mode='css', text_font_size='14px', text_align='right')
-daily_stats2 = Label(x=-321, y=520, x_units='screen', y_units='screen',
+daily_stats2 = Label(x=-320, y=520, x_units='screen', y_units='screen',
                  text='Total Deaths : {:,}'.format(cases_summary[cases_summary['day']==latest_date]['deaths'].sum()), render_mode='css', text_font_size='14px', text_align='right')
 daily_stats3 = Label(x=-305, y=490, x_units='screen', y_units='screen',
                  text='Total Discharged : {:,}'.format(cases_summary[cases_summary['day']==latest_date]['discharged'].sum()), render_mode='css', text_font_size='14px', text_align='right')
@@ -376,9 +376,9 @@ hover.formatters = {'@x': 'datetime'}
 s.add_tools(hover)
 
 
-daily_stats1 = Label(x=-300, y=550, x_units='screen', y_units='screen',
+daily_stats1 = Label(x=-292, y=550, x_units='screen', y_units='screen',
                  text='Total Cases : {:,}'.format(cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum()), render_mode='css', text_font_size='14px', text_align='right')
-daily_stats2 = Label(x=-321, y=520, x_units='screen', y_units='screen',
+daily_stats2 = Label(x=-320, y=520, x_units='screen', y_units='screen',
                  text='Total Deaths : {:,}'.format(cases_summary[cases_summary['day']==latest_date]['deaths'].sum()), render_mode='css', text_font_size='14px', text_align='right')
 daily_stats3 = Label(x=-305, y=490, x_units='screen', y_units='screen',
                  text='Total Discharged : {:,}'.format(cases_summary[cases_summary['day']==latest_date]['discharged'].sum()), render_mode='css', text_font_size='14px', text_align='right')
@@ -735,9 +735,9 @@ citation = Label(x=0, y=0, x_units='screen', y_units='screen',
 
 w.add_layout(citation, 'above')
 
-daily_stats1 = Label(x=-300, y=550, x_units='screen', y_units='screen',
+daily_stats1 = Label(x=-292, y=550, x_units='screen', y_units='screen',
                  text='Total Cases : {:,}'.format(cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum()), render_mode='css', text_font_size='14px', text_align='right')
-daily_stats2 = Label(x=-321, y=520, x_units='screen', y_units='screen',
+daily_stats2 = Label(x=-320, y=520, x_units='screen', y_units='screen',
                  text='Total Deaths : {:,}'.format(cases_summary[cases_summary['day']==latest_date]['deaths'].sum()), render_mode='css', text_font_size='14px', text_align='right')
 daily_stats3 = Label(x=-305, y=490, x_units='screen', y_units='screen',
                 text='Total Discharged : {:,}'.format(cases_summary[cases_summary['day']==latest_date]['discharged'].sum()), render_mode='css', text_font_size='14px', text_align='right')
@@ -805,9 +805,9 @@ citation = Label(x=0, y=0, x_units='screen', y_units='screen',
 
 x.add_layout(citation, 'above')
 
-daily_stats1 = Label(x=-300, y=550, x_units='screen', y_units='screen',
+daily_stats1 = Label(x=-292, y=550, x_units='screen', y_units='screen',
                  text='Total Cases : {:,}'.format(cases_summary[cases_summary['day']==latest_date]['totalConfirmed'].sum()), render_mode='css', text_font_size='14px', text_align='right')
-daily_stats2 = Label(x=-321, y=520, x_units='screen', y_units='screen',
+daily_stats2 = Label(x=-320, y=520, x_units='screen', y_units='screen',
                  text='Total Deaths : {:,}'.format(cases_summary[cases_summary['day']==latest_date]['deaths'].sum()), render_mode='css', text_font_size='14px', text_align='right')
 daily_stats3 = Label(x=-305, y=490, x_units='screen', y_units='screen',
                  text='Total Discharged : {:,}'.format(cases_summary[cases_summary['day']==latest_date]['discharged'].sum()), render_mode='css', text_font_size='14px', text_align='right')
