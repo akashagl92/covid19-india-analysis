@@ -224,7 +224,7 @@ p.xaxis.axis_label = 'Date'
 p.yaxis.axis_label = 'Number of Cases'
 
 
-for name, color in zip(cases_summary['loc'].unique(), itertools.cycle(Dark2_8)):
+for name, color in zip(cases_summary['loc'].sort_values(ascending=True).unique(), itertools.cycle(Dark2_8)):
     cases_summary['day'] = pd.to_datetime(cases_summary['day'])
     renderer=p.line(cases_summary[cases_summary['loc']==name]['day'], cases_summary[cases_summary['loc']==name]['totalConfirmed'], line_width=2, color=color, alpha=1,
           muted_alpha=0.2)
@@ -282,7 +282,7 @@ q.title.text_font_size='17px'
 q.xaxis.axis_label = 'Date'
 q.yaxis.axis_label = 'Number of Deaths'
 
-for name, color in zip(cases_summary['loc'].unique(), itertools.cycle(Dark2_8)):
+for name, color in zip(cases_summary['loc'].sort_values(ascending=True).unique(), itertools.cycle(Dark2_8)):
     cases_summary['day'] = pd.to_datetime(cases_summary['day'])
     renderer=q.line(cases_summary[cases_summary['loc']==name]['day'], cases_summary[cases_summary['loc']==name]['deaths'], line_width=2, color=color, alpha=1,
           muted_alpha=0.2)
@@ -351,7 +351,7 @@ cases_summary['fatality_rate']=1/cases_summary['case-death-ratio']
 cases_summary['fatality_rate']=cases_summary['fatality_rate'].replace(np.inf,0)
 cases_summary['fatality_rate']=cases_summary['fatality_rate'].replace(np.nan,0)
 
-for name, color in zip(cases_summary['loc'].unique(), itertools.cycle(Dark2_8)):
+for name, color in zip(cases_summary['loc'].sort_values(ascending=True).unique(), itertools.cycle(Dark2_8)):
     cases_summary['day'] = pd.to_datetime(cases_summary['day'])
     renderer=s.line(cases_summary[cases_summary['loc']==name]['day'], cases_summary[cases_summary['loc']==name]['case-death-ratio'], line_width=2, color=color, alpha=1,
           muted_alpha=0.2)
@@ -702,7 +702,7 @@ cases_summary['daily_death_growth']=cases_summary['deaths'].groupby(cases_summar
 cases_summary['daily_case_growth']=cases_summary['discharged'].groupby(cases_summary['loc']).pct_change()
 
 
-for name, color in zip(cases_summary['loc'].unique(), itertools.cycle(Dark2_8)):
+for name, color in zip(cases_summary['loc'].sort_values(ascending=True).unique(), itertools.cycle(Dark2_8)):
     cases_summary['day'] = pd.to_datetime(cases_summary['day'])
     #cases_summary['daily confirmed'] = cases_summary[cases_summary['loc'] == name]['totalConfirmed'].diff(1)
     renderer=w.line(cases_summary[cases_summary['loc']==name]['day'], cases_summary[cases_summary['loc']==name]['totalConfirmed'].pct_change(), line_width=2, color=color, alpha=1,
@@ -772,7 +772,7 @@ cases_summary['daily_case_growth']=cases_summary['totalConfirmed'].groupby(cases
 cases_summary['daily_death_growth']=cases_summary['deaths'].groupby(cases_summary['loc']).pct_change()
 cases_summary['daily_case_growth']=cases_summary['discharged'].groupby(cases_summary['loc']).pct_change()
 
-for name, color in zip(cases_summary['loc'].unique(), itertools.cycle(Dark2_8)):
+for name, color in zip(cases_summary['loc'].sort_values(ascending=True).unique(), itertools.cycle(Dark2_8)):
     cases_summary['day'] = pd.to_datetime(cases_summary['day'])
     renderer=x.line(cases_summary[cases_summary['loc']==name]['day'], cases_summary[cases_summary['loc']==name]['deaths'].pct_change(), line_width=2, color=color, alpha=1,
           muted_alpha=0.2)
