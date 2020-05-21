@@ -133,8 +133,8 @@ for i, color in zip(range(len(cases_new_final['loc'].unique())),itertools.cycle(
 
     legend_it.append((cases_new_final['loc'].unique()[i], [renderer_yhat]))
 
-legend1=Legend(items=legend_it[0:16], location=(10,21), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
-legend2=Legend(items=legend_it[16:33], location=(10,0), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
+legend1=Legend(items=legend_it[0:17], location=(10,0), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
+legend2=Legend(items=legend_it[17:36], location=(10,0), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
 
 a.add_layout(legend1,'right')
 a.add_layout(legend2,'right')
@@ -233,8 +233,8 @@ for name, color in zip(cases_summary['loc'].unique(), itertools.cycle(Dark2_8)):
 
     legend_it.append((name, [renderer]))
 
-legend1=Legend(items=legend_it[0:16], location=(10,21), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
-legend2=Legend(items=legend_it[16:33], location=(10,0), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
+legend1=Legend(items=legend_it[0:17], location=(10,0), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
+legend2=Legend(items=legend_it[17:36], location=(10,0), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
 
 p.add_layout(legend1,'right')
 p.add_layout(legend2,'right')
@@ -291,8 +291,8 @@ for name, color in zip(cases_summary['loc'].unique(), itertools.cycle(Dark2_8)):
 
     legend_it.append((name, [renderer]))
 
-legend1=Legend(items=legend_it[0:16], location=(10,21), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
-legend2=Legend(items=legend_it[16:33], location=(10,0), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
+legend1=Legend(items=legend_it[0:17], location=(10,0), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
+legend2=Legend(items=legend_it[17:36], location=(10,0), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
 
 q.add_layout(legend1,'right')
 q.add_layout(legend2,'right')
@@ -360,8 +360,8 @@ for name, color in zip(cases_summary['loc'].unique(), itertools.cycle(Dark2_8)):
 
     legend_it.append((name, [renderer]))
 
-legend1=Legend(items=legend_it[0:16], location=(10,21), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
-legend2=Legend(items=legend_it[16:33], location=(10,0), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
+legend1=Legend(items=legend_it[0:17], location=(10,0), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
+legend2=Legend(items=legend_it[17:36], location=(10,0), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
 
 s.add_layout(legend1,'right')
 s.add_layout(legend2,'right')
@@ -714,8 +714,8 @@ for name, color in zip(cases_summary['loc'].unique(), itertools.cycle(Dark2_8)):
         (cases_summary[cases_summary['loc'] == name]['totalConfirmed'].pct_change() < 0).any()) else name
     legend_it.append((check_negative_growth(name), [renderer]))
 
-legend1=Legend(items=legend_it[0:16], location=(10,21), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
-legend2=Legend(items=legend_it[16:33], location=(10,0), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
+legend1=Legend(items=legend_it[0:17], location=(10,0), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
+legend2=Legend(items=legend_it[17:36], location=(10,0), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
 
 w.add_layout(legend1,'right')
 w.add_layout(legend2,'right')
@@ -784,8 +784,8 @@ for name, color in zip(cases_summary['loc'].unique(), itertools.cycle(Dark2_8)):
     legend_it.append((check_negative_growth(name), [renderer]))
 
 
-legend1=Legend(items=legend_it[0:16], location=(10,21), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
-legend2=Legend(items=legend_it[16:33], location=(10,0), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
+legend1=Legend(items=legend_it[0:17], location=(10,0), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
+legend2=Legend(items=legend_it[17:36], location=(10,0), click_policy='hide', title="Click on States to Switch ON/OFF", title_text_font_style = "bold")
 
 x.add_layout(legend1,'right')
 x.add_layout(legend2,'right')
