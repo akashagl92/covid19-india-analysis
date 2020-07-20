@@ -173,7 +173,7 @@ for i in cases_new_final['loc'].unique():
         z=x
         min_state=i
 
-daily_insight = Div(text="""<br><br>In last 10 Days,<br><br> <b>{}</b> has had the fastest growth in New Daily Confirmed cases, while;<br>
+daily_insight = Div(text="""<br><br>In last 10 Days,<br><br> <b>{}</b> has had the fastest growth in New Daily Confirmed cases, while;<br><br>
                            <b>{}</b> has had the fastest decline.<br>""".format(max_state,min_state),
                       width=150, margin=(0,0,0,20))
 
