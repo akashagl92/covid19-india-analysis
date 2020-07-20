@@ -159,8 +159,22 @@ citation = Label(x=-50, y=-15, x_units='screen', y_units='screen',
 
 a.add_layout(citation, 'below')
 
+#State with fastest/slowest growth in daily confirmed cases in last 10 days
+y=0.0
+z=0.0
+max_state=''
+min_state=''
+for i in cases_new_final['loc'].unique():
+    x=(cases_new_final[cases_new_final['loc'] == i]['newConfirmed'].tail(10)[-1:] - cases_new_final[cases_new_final['loc'] == i]['newConfirmed'].tail(10)[:1].tolist()).tolist()[0]
+    if(x>y):
+        y=x
+        max_state=i
+    if(x<z):
+        z=x
+        min_state=i
 
-daily_insight = Div(text="""<br><br>New Confirmed cases has grown at the fastest rate in Tamil Nadu.<br><br>The number of cases has increased at the fastest rate from April 26th with 1821 Total Confirmed cases at the time.<br>""",
+daily_insight = Div(text="""<br><br>In last 10 Days,<br><br> <b>{}</b> has had the fastest growth in New Daily Confirmed cases, while;<br>
+                           <b>{}</b> has had the fastest decline.<br>""".format(max_state,min_state),
                       width=150, margin=(0,0,0,20))
 
 daily_stats = Div(text="""<b> Total Cases</b> : {:,}<br>                                                                     
