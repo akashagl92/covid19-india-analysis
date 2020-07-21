@@ -19,15 +19,45 @@
                         left: 50%;
                         top: 50%;
                         }
-
+	    .social     {
+                        display: block;
+                        width: 20%;
+                        margin:auto;
+                        }
+            .fa         {
+                        padding: 20px;
+                        font-size: 30px;
+                        width: 20px;
+                        text-align: center;
+                        text-decoration: none;
+                        margin: 5px 2px;
+                        border-radius: 50%;
+                        }
+            .fa:hover   {
+                        opacity: 0.7;
+                        }
+            .fa-twitter{
+                        background: #55ACEE;
+                        color: white;
+                        }
+            .fa-linkedin{
+                        background: #007bb5;
+                        color: white;
+                        }
+            .fa-github {
+                        background: #333131;
+                        color: white;
+                       }
         </style>
 
         <meta charset="utf-8">
        {% block title %} <title>{{"COVID19 Analysis India"}}</title> {% endblock %}
         <meta name="HandheldFriendly" content="True">
-	    <meta name="MobileOptimized" content="320">
-	    <meta name="viewport" content="width=device-width, initial-scale=0.28"/>
+	<meta name="MobileOptimized" content="320">
+	<meta name="viewport" content="width=device-width, initial-scale=0.28"/>
         <link rel="canonical" href="http://covid19analysis.live" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
 
      {% endblock %}
 
@@ -77,6 +107,11 @@
             height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class = 'se-pre-con'><img src="/covid19-india/static/Preloader_6.gif"/></div>
      <div class="bokeh-tabs">{{ embed(roots.tabs)}}</div>
+     <div class="social">
+        <a href="https://twitter.com/akash2692" target='blank' class="fa fa-twitter"></a>
+        <a href="https://linkedin.com/in/akashagl" target='blank' class="fa fa-linkedin"></a>
+        <a href="https://github.com/akashagl92" target='blank' class="fa fa-github"></a>
+    </div>
      {% endblock %}
 </body>
 </html>
