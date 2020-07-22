@@ -165,7 +165,7 @@ z=0.0
 max_state=''
 min_state=''
 for i in cases_new_final['loc'].unique():
-    x=(cases_new_final[cases_new_final['loc'] == i]['newConfirmed'].tail(10)[-1:] - cases_new_final[cases_new_final['loc'] == i]['newConfirmed'].tail(10)[:1].tolist()).tolist()[0]
+    x=(cases_new_final[cases_new_final['loc'] == i]['yhat'].tail(10)[-1:] - cases_new_final[cases_new_final['loc'] == i]['yhat'].tail(10)[:1].tolist()).tolist()[0]
     if(x>y):
         y=x
         max_state=i
