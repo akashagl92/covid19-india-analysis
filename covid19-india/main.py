@@ -697,6 +697,8 @@ cases_summary=pd.json_normalize(json_data['data'], record_path='regional', meta=
 cases_summary['loc']=np.where(cases_summary['loc']=='Nagaland#', 'Nagaland', cases_summary['loc'])
 cases_summary['loc']=np.where(cases_summary['loc']=='Madhya Pradesh#', 'Madhya Pradesh', cases_summary['loc'])
 cases_summary['loc']=np.where(cases_summary['loc']=='Jharkhand#', 'Jharkhand', cases_summary['loc'])
+cases_summary['loc']=np.where(cases_summary['loc']=='Dadra and Nagar Haveli and Daman and Diu', 'Dadar Nagar Haveli', cases_summary['loc'])
+cases_summary['loc']=np.where(cases_summary['loc']=='Telangana', 'Telengana', cases_summary['loc'])
 
 cases_summary = cases_summary.dropna(axis=0)
 
