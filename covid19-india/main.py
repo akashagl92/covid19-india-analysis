@@ -41,6 +41,7 @@ cases_summary['loc']=np.where(cases_summary['loc']=='Madhya Pradesh#', 'Madhya P
 cases_summary['loc']=np.where(cases_summary['loc']=='Jharkhand#', 'Jharkhand', cases_summary['loc'])
 cases_summary['loc']=np.where(cases_summary['loc']=='Dadra and Nagar Haveli and Daman and Diu', 'Dadar Nagar Haveli', cases_summary['loc'])
 cases_summary['loc']=np.where(cases_summary['loc']=='Telangana', 'Telengana', cases_summary['loc'])
+cases_summary['loc']=np.where(cases_summary['loc']=='Telangana***', 'Telengana', cases_summary['loc'])
 
 cases_summary = cases_summary.dropna(axis=0)
 
@@ -699,6 +700,7 @@ cases_summary['loc']=np.where(cases_summary['loc']=='Madhya Pradesh#', 'Madhya P
 cases_summary['loc']=np.where(cases_summary['loc']=='Jharkhand#', 'Jharkhand', cases_summary['loc'])
 cases_summary['loc']=np.where(cases_summary['loc']=='Dadra and Nagar Haveli and Daman and Diu', 'Dadar Nagar Haveli', cases_summary['loc'])
 cases_summary['loc']=np.where(cases_summary['loc']=='Telangana', 'Telengana', cases_summary['loc'])
+cases_summary['loc']=np.where(cases_summary['loc']=='Telangana***', 'Telengana', cases_summary['loc'])
 
 cases_summary = cases_summary.dropna(axis=0)
 
