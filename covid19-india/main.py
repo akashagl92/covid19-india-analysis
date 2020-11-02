@@ -985,13 +985,52 @@ div = Div(text="""<b>Latest Date</b>: {} <br><br>
                         correlation),
 width=200, height=100, margin=(30,0,0,20))
 
-layout = row(fig, div)
+layout1 = row(fig, div)
+
+#Correlation Chart Over Time
+correlate = figure(plot_width=1200, plot_height=600, x_axis_type="datetime",  sizing_mode="scale_both")
+correlate.title.text='Correlation Between Daily Tests and Daily Cases Chart over Time'
+correlate.title.align='center'
+correlate.title.text_font_size='17px'
+correlate.xaxis.axis_label = 'Date'
+correlate.yaxis.axis_label = 'Pearson Correlation Index'
+
+correlation=[]
+for i in range(0,len(cases_tests_without_na)):
+    if(i>50):
+        correl=cases_tests_without_na[['totalConfirmed','daily_tests']][:i].corr('pearson')['daily_tests'][:i][0]
+        correlation.append(correl)
+
+correlation_chart=correlate.line(cases_tests_without_na['timestamp'][51:], correlation, line_width=2, alpha=1,
+          muted_alpha=0.2)
+
+hover = HoverTool(line_policy='next', renderers=[correlation_chart])
+hover.tooltips = [('Day', '@x{%F}'),
+                  ('Correlation Daily Tests Vs Daily Cases Until the Day', '@y')  # @$name gives the value corresponding to the legend
+]
+
+hover.formatters = {'@x': 'datetime'}
+
+correlate.add_tools(hover)
+
+message = Div(text="""The decreasing correlation implies decrease in number of daily cases despite increase in number of cases.<br><br>It could also imply otherwise but in this context the number of daily cases going up with reduced number of tests is not logically feasible. 
+                    <br><br>Hence, we can conclude the number of daily cases are <b>genuinely</b> improving with drecreasing correlation.""",
+width=200, height=100, margin=(80,0,0,20))
 
 div = Div(text="""<b>Source:</b>
                 COVID-19 REST API for India: <a href='https://api.rootnet.in/covid19-in/stats/testing/raw' target="_blank"> The Ministry of Health and Family Welfare</a> """,
 width=300, height=50, align='start')
 
-layout = column(layout,div, sizing_mode='scale_both')
+note = Label(x=-50, y=-15, x_units='screen', y_units='screen',
+             text="""The first Pearson Correlation between Daily Tests and Daily Confirmed Cases plotted here is at May 8th, 51st day since the first recorded data, in order to have large enough sample size for the correlation to be stable and comparable over following timestamps. """, render_mode='css', text_font_size='14px', text_align='left')
+
+correlate.add_layout(note, 'below')
+layout2 = column(correlate, margin=(0,0,40,0))
+layout2=column(layout2,div, sizing_mode='scale_both')
+layout2 = row(layout2,message)
+
+layout1=column(layout1, margin=(0,0,40,0))
+layout=column(layout1, layout2)
 
 tab11 = Panel(child=layout, title="Correlation - Tests Vs Cases")
 
