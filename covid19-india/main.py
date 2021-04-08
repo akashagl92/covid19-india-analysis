@@ -608,7 +608,7 @@ div = Div(text="""<b>Latest Date</b>: {} <br> <br>
                   cases_summary[cases_summary['daily deaths']==cases_summary['daily deaths'].max()]['day'].tolist()[0],
                   np.int64(cases_summary['daily deaths'].max()),
                   cases_summary[cases_summary['daily discharged'] == cases_summary['daily discharged'].max()]['day'].tolist()[0],
-                  np.int64(cases_summary['daily discharged'].max()),
+                  np.int64(cases_summary['daily discharged'].max())),
 width=200, height=100,  margin=(30,0,0,20))
 layout = row(u, div)
 
