@@ -61,7 +61,7 @@ cases_summary['day_count']=(cases_summary['day'].groupby(cases_summary['loc']).c
 cases_summary['day'] = pd.to_datetime(cases_summary['day'])
 cases_summary['cum_day_count']=(cases_summary['day']-cases_summary['day'].min())+timedelta(days=1)
 cases_summary['cum_day_count']= cases_summary['cum_day_count'].astype('str').str.replace(' days 00:00:00.000000000', '')
-cases_summary['cum_day_count'] = pd.to_numeric(cases_summary['cum_day_count'])
+cases_summary['cum_day_count'] = pd.to_numeric(cases_summary['cum_day_count'], errors='coerce')
 
 #Preparing Dataset for DataTable
 cases_summary['growth-rate']=cases_summary['totalConfirmed'].groupby(cases_summary['loc']).diff(10)
